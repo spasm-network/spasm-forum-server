@@ -1,12 +1,12 @@
-# DegenRocket server
+# Spasm Forum server
 
-DegenRocket-server is a backend for a [Spasm-powered](https://github.com/degenrocket/spasm.js) forum.
+spasm-forum-server is a backend for a [Spasm-powered](https://github.com/spasm-network/spasm.js) forum.
 
-DegenRocket-web repository can be found [here](https://github.com/degenrocket/degenrocket-web).
+spasm-forum-web repository can be found [here](https://github.com/spasm-network/spasm-forum-web).
 
 ## Server setup
 
-If you don't have any experience at setting up a server, then there is a beginner-friendly guide with scripts for an automated [initial server setup](https://github.com/degenrocket/degenrocket-scripts).
+If you don't have any experience at setting up a server, then there is a beginner-friendly guide with scripts for an automated [initial server setup](https://github.com/spasm-network/spasm-forum-scripts).
 
 
 ## Postgres database
@@ -110,10 +110,10 @@ npm install
 
 Download the app from the Github into the `backend/` folder.
 
-*Note: the app should already be downloaded if you've used scripts for an automated [initial server setup](https://github.com/degenrocket/degenrocket-scripts).*
+*Note: the app should already be downloaded if you've used scripts for an automated [initial server setup](https://github.com/spasm-network/spasm-forum-scripts).*
 
 ```
-git clone https://github.com/degenrocket/degenrocket-server.git backend/
+git clone https://github.com/spasm-network/spasm-forum-server.git backend/
 cd backend/
 ```
 
