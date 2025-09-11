@@ -84,6 +84,8 @@ Table `actions_count` contains the number of reactions received by the target ac
 
 ## Install
 
+*Note: nvm and npm should already be installed if you've used scripts for an automated [initial server setup](https://github.com/spasm-network/spasm-forum-scripts).*
+
 ```
 # update npm
 npm install -g npm
@@ -91,17 +93,20 @@ npm install -g npm
 # install nvm to manage node versions
 # https://github.com/nvm-sh/nvm
 
-# install node v18
-nvm install 18
+# install node v20
+nvm install 20
 
-# set node v18 as default
-nvm alias default 18
+# set node v20 as default
+nvm alias default 20
 
-# switch to node v18
-nvm use 18
+# switch to node v20
+nvm use 20
+
+# update npm
+npm install -g npm
 
 # install packages
-npm install
+npm ci
 ```
 
 ---
