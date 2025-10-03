@@ -79,8 +79,11 @@ export const fetchPostsFromRssSources = async (frequency) => {
         const customConfig = new ConfigForSubmitSpasmEvent()
         customConfig.whitelist.action.post.enabled = false
 
+        // Reverse order so the newest posts inserted at the end
+        const itemsReversed = [...data.items].reverse()
+
         // Execute sequentially one by one
-        for (const item of data.items) {
+        for (const item of itemsReversed) {
           // Submit V0/V1 to 'posts' table
           await filterData(item)
 
