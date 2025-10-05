@@ -96,9 +96,18 @@ export const fetchPostsFromRssSources = async (frequency) => {
           if (item.title) { post.title = item.title }
           if (item.link) { post.url = item.link }
           if (item.pubDate) { post.pubdate = item.pubDate }
-          if (item.contentSnippet) {
-            post.description = item.contentSnippet
-          }
+
+          post.description = ''
+          if (
+            item.contentSnippet &&
+            typeof(item.contentSnippet) === "string"
+          ) { post.description = item.contentSnippet }
+          if (
+            item['content:encodedSnippet'] &&
+            typeof(item['content:encodedSnippet']) === "string" &&
+            item['content:encodedSnippet'].length > post.description.length
+          ) { post.description = item['content:encodedSnippet'] }
+          
           submitSpasmEvent(post, poolDefault, customConfig)
         }
       } else {
