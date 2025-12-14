@@ -134,10 +134,13 @@ cp .env.example .env
 
 ## Test locally
 
+*Note: this is an optional step intended for developers.
+You can skip this step if you want to run a Spasm forum.*
+
 Install npm packages in the backend folder.
 
 ```
-npm install
+npm ci
 ```
 
 Start the app.
@@ -170,10 +173,6 @@ pm2 save
 # Check processes
 pm2 list
 ```
-
-## RSS
-
-The current git version doesn't include the RSS module. It might be added in the future.
 
 ## Troubleshooting
 
