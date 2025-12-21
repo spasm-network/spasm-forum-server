@@ -357,3 +357,90 @@ export const isHex = (
   const valueArray = value.toLowerCase().split("")
   return valueArray.every(char => hexChars.includes(char))
 }
+
+export const isNostrValue = (
+  value: any
+): boolean => {
+  if (!value) return false
+  if (typeof(value) !== "string") return false
+  // Ethereum addresses start with "0x"
+  if (value.startsWith("0x")) return false
+  if (isHex(value)) return false
+
+  if (
+    // Address is npub
+    value.startsWith("npub") &&
+    value.length === 63
+  ) {
+    return true
+  } else if (
+    // String is note
+    value.startsWith("note") &&
+    value.length === 63
+  ) {
+    return true
+  } else if (
+    // String is note
+    value.startsWith("nevent") &&
+    value.length === 68
+  ) {
+    return true
+  } 
+  return false
+}
+
+// Aliases
+export const isNostrId = isNostrValue
+export const isNostrAddress = isNostrValue
+
+export const standardizeValue = (
+  value: any
+): string => {
+  if (!value) return ""
+  if (typeof(value) !== "string") return ""
+  // Ethereum addresses start with "0x"
+  if (value.startsWith("0x") && isHex(value)) return value
+  if (isNostrValue(value)) return toBeHex(value)
+  if (isHex(value)) return value
+  return value
+}
+
+// Aliases
+export const standardizeId = standardizeValue
+export const standardizeAddress = standardizeValue
+
+export const standardizeValues = (
+  values: any
+): string[] => {
+  if (!hasValue(values)) return []
+
+  // Passed value is one ID or address (as a string)
+  if (values && typeof(values) === "string") {
+    if (
+      standardizeValue(values) &&
+      typeof(standardizeValue(values)) === "string"
+    ) {
+      return [standardizeValue(values)]
+    }
+  }
+
+  // Passed value is an array of IDs or addresses
+  const arrayOfStadardizedValues: string[] = []
+  if (Array.isArray(values)) {
+    values.forEach((value: any): void => {
+      if (value && typeof(value) === "string") {
+        if (
+          standardizeValue(value) &&
+          typeof(standardizeValue(value)) === "string"
+        ) {
+          arrayOfStadardizedValues.push(standardizeValue(value))
+        }
+      }
+    })
+  }
+  return arrayOfStadardizedValues
+}
+
+// Aliases
+export const standardizeIds = standardizeValues
+export const standardizeAddresses = standardizeValues
