@@ -90,6 +90,8 @@ const enableWhitelistForActionReact: boolean =
   process?.env?.ENABLE_WHITELIST_FOR_ACTION_REACT === 'true' ? true : false;
 const whitelistedForActionReact: string[] =
   splitIntoArray(process?.env?.WHITELISTED_FOR_ACTION_REACT)
+const pinnedIds: string[] =
+  splitIntoArray(process?.env?.PINNED_IDS)
 
 // Filters
 const feedFiltersActivityHot: number =
@@ -147,6 +149,7 @@ export const updateAppConfig = async (
   updateArray("whitelistedForActionPost")
   updateArray("whitelistedForActionReply")
   updateArray("whitelistedForActionReact")
+  updateArray("pinnedIds")
 
   // Numbers
   const updateNumber = (key: AppConfigKeyNumber) => {
@@ -267,6 +270,7 @@ export let env = {
   whitelistedForActionReply,
   enableWhitelistForActionReact,
   whitelistedForActionReact,
+  pinnedIds,
   feedFiltersActivityHot,
   feedFiltersActivityRising,
   enableSpasmModule,

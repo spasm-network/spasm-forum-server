@@ -756,6 +756,7 @@ export interface AppConfig {
   whitelistedForActionPost?: string[]
   whitelistedForActionReply?: string[]
   whitelistedForActionReact?: string[]
+  pinnedIds?: string[]
   // Numbers
   feedFiltersActivityHot?: number
   feedFiltersActivityRising?: number
@@ -910,6 +911,7 @@ export type AppConfigKeyArray =
   | "whitelistedForActionPost"
   | "whitelistedForActionReply"
   | "whitelistedForActionReact"
+  | "pinnedIds"
 
 export type AppConfigKeyNumber =
   | "shortUrlsLengthOfWeb3Ids"
