@@ -77,6 +77,16 @@ const enableRssModule: boolean =
 const enableRssSourcesUpdates: boolean =
   process.env.ENABLE_RSS_SOURCES_UPDATES === 'true' ? true : false
 
+// RSS feed is enabled by default
+const enableRssFeedChannel: boolean =
+  process.env.ENABLE_RSS_FEED === 'false' ? false : true
+const rssFeedChannelTitle: string =
+  process.env.RSS_FEED_CHANNEL_TITLE || "Spasm forum";
+const rssFeedChannelLink: string =
+  process.env.RSS_FEED_CHANNEL_LINK || "https://forum.spasm.network";
+const rssFeedChannelDescription: string =
+  process.env.RSS_FEED_CHANNEL_DESCRIPTION || "Unplug from slave tech!";
+
 // Disabled by default
 const enableWhitelistForActionPost: boolean =
   process?.env?.ENABLE_WHITELIST_FOR_ACTION_POST === 'true' ? true : false;
@@ -109,8 +119,7 @@ export const updateAppConfig = async (
   ) { return null }
 
   const newEnv = copyOf(env)
-
-  // Booleans
+// Booleans
   const updateBoolean = (key: AppConfigKeyBoolean) => {
     if (
       key in appConfig && typeof(appConfig[key]) === "boolean"
@@ -133,6 +142,7 @@ export const updateAppConfig = async (
   updateBoolean("enableSpasmSourcesUpdates")
   updateBoolean("enableRssModule")
   updateBoolean("enableRssSourcesUpdates")
+  updateBoolean("enableRssFeedChannel")
   updateBoolean("ignoreWhitelistForActionPostInSpasmModule")
   updateBoolean("ignoreWhitelistForActionReactInSpasmModule")
   updateBoolean("ignoreWhitelistForActionReplyInSpasmModul")
@@ -230,6 +240,10 @@ export const updateAppConfig = async (
 
   updateString("extraContactInfo")
 
+  updateString("rssFeedChannelTitle")
+  updateString("rssFeedChannelLink")
+  updateString("rssFeedChannelDescription")
+
   // Reminded: don't change these keys:
   // - enableAppConfigChanges
   // - enableAppConfigChangesByAdmin
@@ -277,6 +291,10 @@ export let env = {
   enableSpasmSourcesUpdates,
   enableRssModule,
   enableRssSourcesUpdates,
+  enableRssFeedChannel,
+  rssFeedChannelTitle,
+  rssFeedChannelLink,
+  rssFeedChannelDescription,
   ignoreWhitelistForActionPostInSpasmModule,
   ignoreWhitelistForActionReactInSpasmModule,
   ignoreWhitelistForActionReplyInSpasmModule

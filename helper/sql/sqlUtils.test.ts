@@ -71,7 +71,8 @@ import {
   fetchAllModerationsByParentId,
   fetchAndAddCommentsToEvent,
   fetchAndAddCommentsRecursively,
-  buildTreeDown
+  buildTreeDown,
+  fetchAllSpasmEventsV2ByFilter
 } from './sqlUtils';
 const { spasm } = require('spasm.js');
 
@@ -176,10 +177,18 @@ describe("multiple chained tests", () => {
 
     const fetchedEventsDmpBySigner = await fetchAllSpasmEventsV2BySigner(
       "0xf8553015220a857eda377a1e903c9e5afb3ac2fa",
+      {},
       poolTest
     )
 
     expect(fetchedEventsDmpBySigner[0].title).toStrictEqual("genesis")
+
+    const fetchedEventsDmpByFilterWithSigner = await fetchAllSpasmEventsV2ByFilter(
+      { signer: "0xf8553015220a857eda377a1e903c9e5afb3ac2fa" },
+      poolTest
+    )
+
+    expect(fetchedEventsDmpByFilterWithSigner[0].title).toStrictEqual("genesis")
 
     expect(
       await howManyEntriesInTable("spasm_events", poolTest)

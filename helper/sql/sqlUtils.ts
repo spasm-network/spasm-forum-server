@@ -817,6 +817,7 @@ export const buildTreeDown = async (
 
 export const fetchAllSpasmEventsV2BySigner = async (
   dirtySigner: string,
+  filters: FeedFiltersV2,
   pool = poolDefault,
   dirtyDbTable = "spasm_events"
 ): Promise<SpasmEventV2[] | null> => {
@@ -837,6 +838,33 @@ export const fetchAllSpasmEventsV2BySigner = async (
     signer.startsWith("npub")
   ) { signer = toBeHex(signer) }
 
+  let limit = 20
+  const maxLimit = 100
+  // spasm.sanitizeEvent() can sanitize any object/array
+  spasm.sanitizeEvent(filters)
+
+  if (
+    // Limit is a number
+    typeof(filters?.limit) === "number" &&
+    filters?.limit >= 0
+  ) {
+    limit = Number(filters.limit)
+  } else if (
+    // Limit is a string
+    typeof(filters?.limit) === "string" &&
+    Number(filters?.limit) >= 0
+  ) {
+    limit = Number(filters.limit)
+  } else if (
+    // Limit is not specified
+    !filters?.limit &&
+    typeof(filters?.limit) !== "number"
+  ) {
+    // Do nothing
+  }
+
+  if (limit > maxLimit) { limit = maxLimit }
+
   try {
     // Works
     const res = await pool.query(`
@@ -844,10 +872,9 @@ export const fetchAllSpasmEventsV2BySigner = async (
       FROM ${dbTable}
       WHERE spasm_event @> $1::jsonb
       ORDER BY db_added_timestamp DESC
+      LIMIT COALESCE($2, 20)
       `,
       [
-        // TODO add filter by action
-        // $1 signer
         {
           "authors": [
             {
@@ -858,7 +885,8 @@ export const fetchAllSpasmEventsV2BySigner = async (
               ]
             }
           ]
-        }
+        },
+        limit
       ]
     )
 
@@ -1830,6 +1858,129 @@ export const fetchAllSpasmEventsV2ByFilter = async (
     const params: any[] = [limit]
     const conditions: string[] = []
 
+    // One signer
+    if (
+      filters?.signer &&
+      (
+        typeof(filters?.signer) === "string" ||
+        typeof(filters?.signer) === "number"
+      ) &&
+      filters?.signer !== "any"
+    ) {
+      let signer = filters?.signer
+      if (
+        typeof(signer) === "string" &&
+        signer.length === 63 &&
+        signer.startsWith("npub") &&
+        toBeHex(signer)
+      ) { signer = toBeHex(signer) }
+
+      const queryObjectForSigner = {
+        "authors": [
+          {
+            "addresses": [
+              {
+                "value": signer
+              }
+            ]
+          }
+        ]
+      }
+      params.push(queryObjectForSigner)
+      // Using ${params.length} instead of numbers like $1, $2
+      conditions.push(`
+        spasm_event @> $${params.length}::jsonb `)
+
+    // Multiple signers
+    } else if (
+      Array.isArray(filters?.signer) &&
+      isArrayWithValues(filters?.signer)
+    ) {
+      const queryArrayForSigner = []
+      filters?.signer.forEach((signer: string | number) => {
+        if (signer && (
+          typeof(signer) === "string" ||
+          typeof(signer) === "number"
+        )) {
+          if (
+            typeof(signer) === "string" &&
+            signer.length === 63 &&
+            signer.startsWith("npub") &&
+            toBeHex(signer)
+          ) { signer = toBeHex(signer) }
+
+          queryArrayForSigner.push({
+            "authors": [
+              {
+                "addresses": [
+                  {
+                    "value": signer
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      })
+      params.push(queryArrayForSigner)
+      // Using ${params.length} instead of numbers like $1, $2
+      conditions.push(`
+        spasm_event @> ANY($${params.length}::jsonb[]) `)
+    }
+
+    // One parentId
+    if (
+      filters?.parentId &&
+      (
+        typeof(filters?.parentId) === "string" ||
+        typeof(filters?.parentId) === "number"
+      ) &&
+      filters?.parentId !== "any"
+    ) {
+      let parentId = filters?.parentId
+      const queryObjectForParentId = {
+        "parent": {
+          "ids": [
+            {
+              "value": parentId
+            }
+          ]
+        }
+      }
+      params.push(queryObjectForParentId)
+      // Using ${params.length} instead of numbers like $1, $2
+      conditions.push(`
+        spasm_event @> $${params.length}::jsonb `)
+
+    // Multiple parentIds
+    } else if (
+      Array.isArray(filters?.parentId) &&
+      isArrayWithValues(filters?.parentId)
+    ) {
+      const queryArrayForParentIds = []
+      filters?.parentId.forEach((parentId: string | number) => {
+        if (parentId && (
+          typeof(parentId) === "string" ||
+          typeof(parentId) === "number"
+        )) {
+          queryArrayForParentIds.push({
+            "parent": {
+              "ids": [
+                {
+                  "value": parentId
+                }
+              ]
+            }
+          })
+        }
+      })
+      params.push(queryArrayForParentIds)
+      // Using ${params.length} instead of numbers like $1, $2
+      conditions.push(`
+        spasm_event @> ANY($${params.length}::jsonb[]) `)
+    }
+
+    // One category
     if (
       filters?.category &&
       (
@@ -1845,8 +1996,30 @@ export const fetchAllSpasmEventsV2ByFilter = async (
       // Using ${params.length} instead of numbers like $1, $2
       conditions.push(`
         spasm_event @> $${params.length}::jsonb `)
+
+    // Multiple categories
+    } else if (
+      Array.isArray(filters?.category) &&
+      isArrayWithValues(filters?.category)
+    ) {
+      const queryArrayForCategory = []
+      filters?.category.forEach((category: string | number) => {
+        if (category && (
+          typeof(category) === "string" ||
+          typeof(category) === "number"
+        )) {
+          queryArrayForCategory.push(
+            { "categories": [ { "name": category } ] }
+          )
+        }
+      })
+      params.push(queryArrayForCategory)
+      // Using ${params.length} instead of numbers like $1, $2
+      conditions.push(`
+        spasm_event @> ANY($${params.length}::jsonb[]) `)
     }
 
+    // One action
     if (filters?.action && (
       typeof(filters?.action) === "string" ||
       typeof(filters?.action) === "number"
@@ -1858,6 +2031,25 @@ export const fetchAllSpasmEventsV2ByFilter = async (
       // Using ${params.length} instead of numbers like $1, $2
       conditions.push(`
         spasm_event @> $${params.length}::jsonb `)
+
+    // Multiple actions
+    } else if (
+      Array.isArray(filters?.action) &&
+      isArrayWithValues(filters?.action)
+    ) {
+      const queryArrayForAction = []
+      filters?.action.forEach((action: string | number) => {
+        if (action && (
+          typeof(action) === "string" ||
+          typeof(action) === "number"
+        )) {
+          queryArrayForAction.push({ "action": action })
+        }
+      })
+      params.push(queryArrayForAction)
+      // Using ${params.length} instead of numbers like $1, $2
+      conditions.push(`
+        spasm_event @> ANY($${params.length}::jsonb[]) `)
     }
 
     if (filters?.source && (
@@ -1873,9 +2065,10 @@ export const fetchAllSpasmEventsV2ByFilter = async (
         spasm_event @> $${params.length}::jsonb `)
     }
 
+    // One keyword
     if (filters?.keyword && (
-      typeof(filters?.keyword) === "string" ||
-      typeof(filters?.keyword) === "number"
+      typeof(filters?.keyword) === "string"
+      // || typeof(filters?.keyword) === "number"
     )) {
       const queryArrayForKeyword = [
         { "keywords": [ filters?.keyword ] },
@@ -1883,6 +2076,33 @@ export const fetchAllSpasmEventsV2ByFilter = async (
         { "keywords": [ filters?.keyword.toLowerCase() ] }
       ]
       params.push(queryArrayForKeyword)
+      // Using ${params.length} instead of numbers like $1, $2
+      conditions.push(`
+        spasm_event @> ANY($${params.length}::jsonb[]) `)
+
+    // Multiple keywords
+    } else if (
+      Array.isArray(filters?.keyword) &&
+      isArrayWithValues(filters?.keyword)
+    ) {
+      const queryArrayForKeywords = []
+      filters?.keyword.forEach((keyword: string | number) => {
+        if (keyword && (
+          typeof(keyword) === "string"
+          // || typeof(keyword) === "number"
+        )) {
+          queryArrayForKeywords.push(
+            { "keywords": [ keyword ] }
+          )
+          queryArrayForKeywords.push(
+            { "keywords": [ keyword.toUpperCase() ] }
+          )
+          queryArrayForKeywords.push(
+            { "keywords": [ keyword.toLowerCase() ] }
+          )
+        }
+      })
+      params.push(queryArrayForKeywords)
       // Using ${params.length} instead of numbers like $1, $2
       conditions.push(`
         spasm_event @> ANY($${params.length}::jsonb[]) `)

@@ -46,7 +46,7 @@
     "nostr-tools": "1.17.0",
     "pg": "8.12.0",
     "rss-parser": "3.13.0",
-    "spasm.js": "2.0.0-rc.7"
+    "spasm.js": "2.0.0-rc.15"
   },
   "devDependencies": {
     "@types/cors": "2.8.17",
