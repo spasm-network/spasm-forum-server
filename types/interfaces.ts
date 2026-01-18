@@ -1720,6 +1720,20 @@ export interface SiblingNostrSpasmSignedV2 {
   signatures?: SpasmEventSignatureV2[]
 }
 
+export interface RssEvent {
+  type?: "RssEvent"
+  spasmEnvelope?: string
+  author?: string
+  title?: string
+  description?: string
+  guid?: string
+  link?: string
+  pubDate?: string
+  mediaThumbnailUrl?: string
+  enclosureUrl?: string
+  imgAlt?: string
+}
+
 export class ConvertToRssConfig {
   to: {
     rss: {
@@ -1729,6 +1743,7 @@ export class ConvertToRssConfig {
   customDomain?: string
   customGuid?: string
   customLink?: string
+  addSpasmEnvelope?: boolean
   extraContent: {
     forAction: {
       post: { enabled: boolean }
@@ -1738,12 +1753,15 @@ export class ConvertToRssConfig {
     addDomain: { enabled: boolean }
     text: string
   }
+  convertDescriptionToHtml?: boolean
+  postExecutionHook?: CustomFunctionType
   constructor() {
     this.to = {
       rss: {
         type: "RssEvent",
       }
     }
+    this.addSpasmEnvelope = true
     this.extraContent = {
       forAction: {
         post: { enabled: false },
@@ -1753,6 +1771,7 @@ export class ConvertToRssConfig {
       addDomain: { enabled: true },
       text: "\n\n---\nThis is a response to: "
     }
+    this.convertDescriptionToHtml = true
   }
 }
 

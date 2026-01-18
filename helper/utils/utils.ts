@@ -1,6 +1,7 @@
 import {
   ConfigForSubmitSpasmEvent,
   CustomConfigForSubmitSpasmEvent,
+  CustomFunctionType,
   SpasmEventEnvelopeV2,
   SpasmEventEnvelopeWithTreeV2,
   SpasmEventV2,
@@ -71,9 +72,81 @@ export const hasValue = (el?: any) => {
   return true
 }
 
-export const deepCopyOfObject = (obj: any) => {
-  if (!obj || typeof(obj) !== "object") return {}
-  return JSON.parse(JSON.stringify(obj))
+// export const deepCopyOfObject = (obj: any) => {
+//   if (!obj || typeof(obj) !== "object") return {}
+//   return JSON.parse(JSON.stringify(obj))
+// }
+
+export const deepCopyOfObject = (
+  obj: any, seen = new WeakMap()
+): any => {
+  // Handle primitives and functions
+  if (obj === null || typeof obj !== "object") {
+    return obj
+  }
+  
+  // Check for circular references
+  if (seen.has(obj)) {
+    return seen.get(obj)
+  }
+  
+  // Handle Date objects
+  if (obj instanceof Date) {
+    const copy = new Date(obj)
+    seen.set(obj, copy)
+    return copy
+  }
+  
+  // Handle RegExp objects
+  if (obj instanceof RegExp) {
+    const copy = new RegExp(obj.source, obj.flags)
+    seen.set(obj, copy)
+    return copy
+  }
+  
+  // Handle Map objects
+  if (obj instanceof Map) {
+    const copy = new Map()
+    seen.set(obj, copy)
+    obj.forEach((value, key) => {
+      copy.set(
+        deepCopyOfObject(key, seen),
+        deepCopyOfObject(value, seen)
+      )
+    })
+    return copy
+  }
+  
+  // Handle Set objects
+  if (obj instanceof Set) {
+    const copy = new Set()
+    seen.set(obj, copy)
+    obj.forEach(value => {
+      copy.add(deepCopyOfObject(value, seen))
+    })
+    return copy
+  }
+  
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    const copy: any[] = []
+    seen.set(obj, copy)
+    for (let i = 0; i < obj.length; i++) {
+      copy[i] = deepCopyOfObject(obj[i], seen)
+    }
+    return copy
+  }
+  
+  // Handle regular objects
+  const copy: any = {}
+  seen.set(obj, copy)
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      copy[key] = deepCopyOfObject(obj[key], seen)
+    }
+  }
+  
+  return copy
 }
 
 export const copyOf = deepCopyOfObject
@@ -677,4 +750,9 @@ export const fakeAsAny = (val: any): any => val as any
 // Used for tests to bypass TypeScript any type checks
 export const fakeAsObject = (val: any): Record<any, any> => { 
   return val as Record<any, any>
+}
+
+// Used for tests to bypass TypeScript string type checks
+export const fakeAsFunction = (val: any): CustomFunctionType => {
+  return val as CustomFunctionType
 }
