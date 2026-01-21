@@ -47,6 +47,8 @@ defaultRssFeedConfig.channel.link =
   env?.rssFeedChannelLink || "https://forum.spasm.network"
 defaultRssFeedConfig.channel.description =
   env?.rssFeedChannelDescription || "Unplug from slave tech!"
+defaultRssFeedConfig.channel.imageUrl =
+  env?.rssFeedChannelImageLink || "https://media.spasm.network/spasmim016863a1cae922c77a970a86e0d339455d6417c6106125b8ebac744e50f51581a9.jpeg"
 defaultRssFeedConfig.customConvertToRssConfig = { 
   customDomain: (
     env?.rssFeedChannelLink ||
@@ -226,6 +228,7 @@ app.get("/api/authors/:id", async(req: Request, res: Response) => {
         filters.format === "rss"
       ) {
         const rssFeedConfig = copyOf(defaultRssFeedConfig)
+        rssFeedConfig.filters = filters
         if (fullUri && typeof(fullUri) === "string") {
           rssFeedConfig.channel.fullUri = fullUri
         }
@@ -414,6 +417,7 @@ app.get("/api/events", async(req: Request, res: Response) => {
       filters.format === "rss"
     ) {
       const rssFeedConfig = copyOf(defaultRssFeedConfig)
+      rssFeedConfig.filters = filters
       if (fullUri && typeof(fullUri) === "string") {
         rssFeedConfig.channel.fullUri = fullUri
       }

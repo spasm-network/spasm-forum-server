@@ -86,6 +86,8 @@ const rssFeedChannelLink: string =
   process.env.RSS_FEED_CHANNEL_LINK || "https://forum.spasm.network";
 const rssFeedChannelDescription: string =
   process.env.RSS_FEED_CHANNEL_DESCRIPTION || "Unplug from slave tech!";
+const rssFeedChannelImageLink: string =
+  process.env.RSS_FEED_CHANNEL_IMAGE_LINK || "https://media.spasm.network/spasmim016863a1cae922c77a970a86e0d339455d6417c6106125b8ebac744e50f51581a9.jpeg";
 
 // Disabled by default
 const enableWhitelistForActionPost: boolean =
@@ -243,6 +245,7 @@ export const updateAppConfig = async (
   updateString("rssFeedChannelTitle")
   updateString("rssFeedChannelLink")
   updateString("rssFeedChannelDescription")
+  updateString("rssFeedChannelImageLink")
 
   // Reminded: don't change these keys:
   // - enableAppConfigChanges
@@ -295,6 +298,7 @@ export let env = {
   rssFeedChannelTitle,
   rssFeedChannelLink,
   rssFeedChannelDescription,
+  rssFeedChannelImageLink,
   ignoreWhitelistForActionPostInSpasmModule,
   ignoreWhitelistForActionReactInSpasmModule,
   ignoreWhitelistForActionReplyInSpasmModule
