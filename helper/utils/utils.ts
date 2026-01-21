@@ -348,6 +348,45 @@ export const toBeStandardizedTimestamp = toBeShortTimestamp
 export const toBeStandardTimestamp = toBeShortTimestamp
 export const toBeNostrTimestamp = toBeShortTimestamp
 
+export const toBeDate = (
+  value: string | number,
+  format: "full" | "long" | "short" = "full"
+): string | null => {
+  if (!value || !isStringOrNumber) return null
+  let fullTimestamp = toBeFullTimestamp(value)
+  if (fullTimestamp && isStringOrNumber(fullTimestamp)) {
+    const date = new Date(fullTimestamp).toUTCString()
+    if (date && typeof(date) === "string") {
+      if (format === "full") {
+        return date
+      } else if (format === "long") {
+        return date.slice(5,25)
+      } else if (format === "short") {
+        return date.slice(5,16)
+      }
+    }
+  }
+  return null
+}
+
+export const toBeDateFull = (val: string | number) => {
+  return toBeDate(val, "full")
+}
+
+export const toBeFullDate = toBeDateFull
+
+export const toBeDateLong = (val: string | number) => {
+  return toBeDate(val, "long")
+}
+
+export const toBeLongDate = toBeDateLong
+
+export const toBeDateShort = (val: string | number) => {
+  return toBeDate(val, "short")
+}
+
+export const toBeShortDate = toBeDateShort
+
 export const isValidDate = (date: Date): boolean => {
   return (
     date instanceof Date &&
