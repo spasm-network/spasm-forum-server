@@ -68,12 +68,8 @@ export const fetchPostsFromRssSources = async (frequency) => {
   const getData = async (source) => {
     try {
       const data = await getFeed(source);
-      // TODO: refactor. Check if items exist
-      data ? data.items.forEach(strip) : console.log("data is null");
-      // data ? data.items.forEach(filterData) : console.log("data is null");
-
-
       if (data && data.items && Array.isArray(data.items)) {
+        data.items.forEach(strip)
 
         // config to ignore whitelist for V2 events
         const customConfig = new ConfigForSubmitSpasmEvent()

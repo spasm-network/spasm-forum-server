@@ -1,5 +1,6 @@
 const DOMPurify = require('isomorphic-dompurify');
-const { convert } = require('html-to-text');
+// const { convert } = require('html-to-text');
+var TurndownService = require('turndown')
 
 // Override console.log for production
 if (process.env.NODE_ENV !== "dev") {
@@ -37,19 +38,27 @@ export const stripFeedItem = (feedItem) => {
   feedItem.contentSnippet = DOMPurify.sanitize(feedItem.contentSnippet)
   feedItem.pubDate = DOMPurify.sanitize(feedItem.pubDate)
 
-  const options = {
-    // wordwrap: 130,
-    wordwrap: false,
-    // ...
-  }
+  // const options = {
+  //   // wordwrap: 130,
+  //   wordwrap: false,
+  //   // ...
+  // }
 
-  feedItem.contentSnippet = convert(feedItem.contentSnippet, options);
+  // feedItem.contentSnippet = convert(feedItem.contentSnippet, options);
+  // Convert HTML to markdown
+  var turndownService = new TurndownService()
+  feedItem.contentSnippet =
+    turndownService.turndown(feedItem.contentSnippet)
+  feedItem.contentSnippet = DOMPurify.sanitize(feedItem.contentSnippet)
 
-  // Limit the post description to 1024 chars to reduce
+  // Limit the post description to 20480 chars to reduce
   // the size of a database and a JSON object with feed posts
   // that users fetch via the UI interface.
-  if (typeof(feedItem.contentSnippet === 'string')) {
-    feedItem.contentSnippet = feedItem.contentSnippet.slice(0,1024) + '...'
+  if (
+    typeof(feedItem.contentSnippet === 'string') &&
+    feedItem.contentSnippet?.length > 20480
+  ) {
+    feedItem.contentSnippet = feedItem.contentSnippet.slice(0,20480.) + '...'
   }
 
   // console.log("feedItem['content:encoded'] before pick:", feedItem['content:encoded'])
