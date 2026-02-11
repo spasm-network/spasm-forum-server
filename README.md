@@ -132,6 +132,30 @@ Create default `.env` file, see example `.env.example`.
 cp .env.example .env
 ```
 
+#### Admin panel
+
+Some settings (social media links, lists of moderators, short URLs,
+different whitelists) can be changed via a web page without
+restarting a server.
+
+An admin panel can be accessed through [spasm-forum-web](https://github.com/spasm-network/spasm-forum-web).
+Usually, at `https://example.com/admin`
+or by clicking on an 'admin' button at the bottom menu bar after
+connecting an admin public key (address).
+
+Make sure that an admin panel and app config changes are enabled
+and admin addresses are listed in `.env` files in **both** frontend
+(spasm-forum-web) and backend (spasm-forum-server).
+
+```
+ENABLE_APP_CONFIG_CHANGES=true
+ENABLE_APP_CONFIG_CHANGES_BY_ADMIN=true
+# Separate admin addresses with comma
+ENABLE_ADMIN=true
+ADMINS=""
+```
+
+
 ## Test locally
 
 *Note: this is an optional step intended for developers.

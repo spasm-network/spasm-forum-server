@@ -450,7 +450,7 @@ app.get("/api/events", async(req: Request, res: Response) => {
 })
 
 // Examples:
-// /api/events/search?e=abc123
+// /api/events/search?e=abc123&action=reply&commentsDepth=10
 app.get("/api/events/:id", async(req: Request, res: Response) => {
   // console.log('req.params.id in /api/events/:id is:', req.params.id)
   // console.log('req.params in /api/events/:id is:', req.params)
