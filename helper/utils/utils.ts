@@ -771,6 +771,22 @@ export const splitArrayInChunks = (
   return result;
 }
 
+export const pickOnlyTheseKeysFromObject = (
+  object: Record<any, any>, paths: any[]
+): Record<any, any> => {
+  if (!object || typeof(object) !== 'object') return {}
+  const result = {}
+  for (const path of paths) {
+    // Check if the path exists as an own property
+    // in the source object
+    if (Object.prototype.hasOwnProperty.call(object, path)) {
+      result[path] = object[path];
+    }
+  }
+
+  return result
+}
+
 // Used for tests to bypass TypeScript string type checks
 export const fakeAsString = (val: any): string => val as string
 

@@ -23,7 +23,8 @@ import {
   removeTrailingWhitespaceFromEachLine,
   fakeAsString,
   fakeAsObject,
-  fakeAsArray
+  fakeAsArray,
+  pickOnlyTheseKeysFromObject
 } from './utils';
 const { spasm } = require('spasm.js');
 
@@ -678,6 +679,32 @@ describe("splitStringIntoArrayOfStrings() tests", () => {
     expect(splitIntoArray(fakeAsString(123))).toStrictEqual([]);
     expect(splitIntoArray(fakeAsString([1,2,3]))).toStrictEqual([]);
     expect(splitIntoArray(fakeAsString({a:1}))).toStrictEqual([]);
+  });
+});
+
+// pickOnlyTheseKeysFromObject()
+describe("pickOnlyTheseKeysFromObject() function tests", () => {
+  test("should return object with selected keys", async () => {
+    const feedItem = {
+      guid: "guid-123",
+      url: "url-123",
+      source: "degenrocket.space",
+      tickers: "SPASM",
+      tags: "ROCKET",
+      title: "Moon",
+      link: "https://degenrocket.space",
+      description: "Hello world!",
+      contentSnippet: "Make SPASM Moon Again!",
+    };
+    const output = {
+      guid: "guid-123",
+      source: "degenrocket.space",
+      tickers: "SPASM",
+      title: "Moon",
+      link: "https://degenrocket.space",
+      contentSnippet: "Make SPASM Moon Again!",
+    };
+    expect(pickOnlyTheseKeysFromObject(feedItem, ["guid", "source", "tickers", "title", "link", "contentSnippet", "pubDate"] )).toStrictEqual(output);
   });
 });
 

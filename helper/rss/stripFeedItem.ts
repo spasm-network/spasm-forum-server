@@ -1,3 +1,5 @@
+import {pickOnlyTheseKeysFromObject} from "../utils/utils";
+
 const DOMPurify = require('isomorphic-dompurify');
 // const { convert } = require('html-to-text');
 var TurndownService = require('turndown')
@@ -9,7 +11,6 @@ if (process.env.NODE_ENV !== "dev") {
   console.warn = () => {}
 }
 
-const _ = require("lodash");
 export const stripFeedItem = (feedItem) => {
 
   // atom feed items have 'id' instead of 'guid', 
@@ -67,15 +68,19 @@ export const stripFeedItem = (feedItem) => {
   // console.log("feedItem.description before pick:", feedItem.description)
 
   // contentSnippet is description in rss-parser
-  // TODO replace lodash _.pick function with native one
-  _.pick(feedItem, ["guid", "source", "tickers", "title", "link", "contentSnippet", "pubDate"]);
+  const finalItem = pickOnlyTheseKeysFromObject(
+    feedItem, [
+      "guid", "source", "tickers", "title",
+      "link", "contentSnippet", "pubDate"
+    ]
+  )
   
   // strip off '?source=' or '?utm_source=' and everything after that
-  feedItem.link = feedItem.link.replace(/(\?source=.*$)|(\?utm_source=.*$)/, "");
+  finalItem.link = finalItem.link.replace(/(\?source=.*$)|(\?utm_source=.*$)/, "");
 
   // strip off everything after 'GMT+0000' in pubDate, but keep 'GMT+0000'
   // E.g. some sources add ' (Coordinateed Universal Time)' after 'GMT+0000'
-  feedItem.pubDate = feedItem.pubDate.replace(/GMT\+0000.*$/, "GMT+0000");
+  finalItem.pubDate = finalItem.pubDate.replace(/GMT\+0000.*$/, "GMT+0000");
 
-  return feedItem;
+  return finalItem;
 }
