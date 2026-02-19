@@ -1,0 +1,21 @@
+# AI Agent Instructions
+
+- **Stack**: Node.js/TypeScript with Express; async handlers; responses wrapped in `setTimeout` (~200–300 ms).
+- **API**:
+  - Human-readable docs at `docs/api.md`; typed interfaces in `types/interface.ts`.
+  - Use `format=spasm` (JSON) unless RSS is required. Submit events as a `SpasmEventEnvelopeV2` object.
+- **Database**: PostgreSQL.
+  - Tables: `spasm_events` (signed and unsigned events wrapped in SpasmEventDatabaseV2).
+  - Deprecated tables (you can optionally create them, but don't use them) are `posts`, `actions`, `actions_count`. Initialize via `database.sql` or `npm run initialize-db`/`npm run migrate`.
+- **Setup**: 
+  - Create DB user and databases (`spasm_database`, `spasm_database_test`); add credentials to `.env`.
+  - Install: `nvm install 20 && nvm use 20 && npm ci`.
+- **Run**: 
+  - Dev: `npm run dev` (test at `localhost:5000/api/events`).
+  - Prod: `npm run prod` (uses pm2; `pm2 startup && pm2 save` for persistence).
+- **Admin panel**: Configurable via spasm-forum-web at `/admin`. Enable with `ENABLE_APP_CONFIG_CHANGES=true`, `ENABLE_ADMIN=true`, and add admin pubkeys to `ADMINS=` in `.env`.
+- **Conventions**:
+  - Use the interfaces from `types/interface.ts` for request/response shapes.
+  - Prefer `format=spasm` (JSON) unless RSS is explicitly required.
+  - When submitting events, send a `SpasmEventEnvelopeV2` object in the request body.
+- **Troubleshooting**: If DB permissions denied, grant usage/tables/sequences to the DB user.

@@ -226,6 +226,11 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO dbuser;
 ```
 
+## API Documentation
+
+- **Human docs**: See [docs/api.md](./docs/api.md) for detailed endpoint descriptions and examples.
+- **AI guidance**: See [AGENTS.md](./AGENTS.md) for machine-readable instructions and conventions.
+
 ## Contact
 
 Send a message to `degenrocket` on [Session](https://getsession.org) if you need any help.
