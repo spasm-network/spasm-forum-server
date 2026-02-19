@@ -7,34 +7,37 @@ export type FiltersActivity = "hot" | "rising" | "all" | null;
 export type FiltersWebType = "web2" | "web3" | null;
 
 // Query is a string, so use "false" instead of boolean
-export interface QueryFeedFilters {
-  webType?: FiltersWebType | "false"
-  category?: FiltersCategory | "false"
-  platform?: string | "false"
-  source?: string | "false"
-  activity?: FiltersActivity | "false"
-  keyword?: string | "false"
-  ticker?: string | "false"
-  limitWeb2?: number | string | "false"
-  limitWeb3?: number | string | "false"
-}
+// deprecated
+// export interface QueryFeedFilters {
+//   webType?: FiltersWebType | "false"
+//   category?: FiltersCategory | "false"
+//   platform?: string | "false"
+//   source?: string | "false"
+//   activity?: FiltersActivity | "false"
+//   keyword?: string | "false"
+//   ticker?: string | "false"
+//   limitWeb2?: number | string | "false"
+//   limitWeb3?: number | string | "false"
+// }
 
-export interface FeedFilters {
-  webType?: FiltersWebType | null
-  category?: FiltersCategory | null
-  platform?: string | null
-  source?: string | null
-  activity?: FiltersActivity | null
-  keyword?: string | null
-  ticker?: string | null
-  limitWeb2?: number | string
-  limitWeb3?: number | string
-}
+// deprecated
+// export interface FeedFilters {
+//   webType?: FiltersWebType | null
+//   category?: FiltersCategory | null
+//   platform?: string | null
+//   source?: string | null
+//   activity?: FiltersActivity | null
+//   keyword?: string | null
+//   ticker?: string | null
+//   limitWeb2?: number | string
+//   limitWeb3?: number | string
+// }
 
-export interface FeedFiltersStep {
-  limitWeb2: number
-  limitWeb3: number
-}
+// deprecated
+// export interface FeedFiltersStep {
+//   limitWeb2: number
+//   limitWeb3: number
+// }
 
 // export type PostId = string | number | null | undefined
 // export type PostUrl = string |  null | undefined

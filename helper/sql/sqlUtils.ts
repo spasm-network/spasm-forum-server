@@ -522,6 +522,9 @@ export const fetchAllModerationsByParentId = async (
 export const fetchModerationsByParentId =
   fetchAllModerationsByParentId
 
+// Deprecated in favor of fetchAllSpasmEventsV2ByFilter(filters)
+// with parentId added to filters, e.g. API:
+// "/api/events?parentId=spasmid012345",
 export const fetchAllSpasmEventsV2ByParentIds = async (
   dirtyParentIds: (string | number)[],
   pool = poolDefault,
@@ -815,6 +818,9 @@ export const buildTreeDown = async (
   )
 }
 
+// Deprecated in favor of fetchAllSpasmEventsV2ByFilter(filters)
+// with signer added to filters, e.g. API:
+// "/api/events?signer=0xf8553015220a857eda377a1e903c9e5afb3ac2fa",
 export const fetchAllSpasmEventsV2BySigner = async (
   dirtySigner: string,
   filters: FeedFiltersV2,
