@@ -2,19 +2,13 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { fetchAllPosts } from "../helper/sql/fetchAllPosts";
-import { fetchPostById } from "../helper/sql/fetchPostById";
-import { fetchTargetComments } from "../helper/sql/fetchTargetComments";
-import { fetchLatestComments } from "../helper/sql/fetchLatestComments";
 import { fetchFullIdsFromShortId } from "../helper/sql/fetchFullIdsFromShortId";
 import {
-  QueryFeedFilters,
-  FeedFilters,
   QueryFeedFiltersV2,
   FeedFiltersV2,
-  SpasmEventEnvelopeV2,
   SpasmEventV2,
-  // RssFeed,
+  SpasmEventEnvelopeV2,
+  SpasmEventEnvelopeWithTreeV2,
   AppConfig,
   GenerateRssFeedConfig
 } from "../types/interfaces";
@@ -29,9 +23,7 @@ import {
   fetchAllSpasmEventsV2ByFilter,
   fetchSpasmEventV2ById,
   fetchSpasmEventV2ByShortId,
-  fetchAllSpasmEventsV2BySigner,
   fetchAppConfig,
-  fetchAllSpasmEventsV2ByParentIds
 } from "../helper/sql/sqlUtils";
 import {poolDefault} from "../db";
 import { env, loadAppConfig } from "./../appConfig";
@@ -70,257 +62,9 @@ if (process.env.NODE_ENV !== "dev") {
 }
 
 app.use(cors())
-
 app.use(express.json()) // => req.body
 
 //ROUTES//
-
-// get all posts
-// Examples:
-// "/api/posts?webType=web3&category=any&platform=false&source=false&activity=hot&keyword=false&ticker=false&limitWeb2=0&limitWeb3=10",
-app.get("/api/posts", async(req: Request, res: Response) => {
-  const q: QueryFeedFilters = req.query
-  const filters: FeedFilters = {
-    webType: q.webType && q.webType !== 'false' ? q.webType : null,
-    category: q.category && q.category !== 'false' ? q.category : null,
-    platform: q.platform && q.platform !== 'false' ? q.platform : null,
-    source: q.source && q.source !== 'false' ? q.source : null,
-    activity: q.activity && q.activity !== 'false' ? q.activity : null,
-    keyword: q.keyword && q.keyword !== 'false' ? q.keyword : null,
-    ticker: q.ticker && q.ticker !== 'false' ? q.ticker : null,
-    limitWeb2: q.limitWeb2 && q.limitWeb2 !== 'false' ? q.limitWeb2 : null,
-    limitWeb3: q.limitWeb3 && q.limitWeb3 !== 'false' ? q.limitWeb3 : null
-  }
-
-  // Show a few web3 posts if no query is passed
-  if (!isObjectWithValues(q)) { filters.limitWeb3 = 25 }
-
-  try {
-      const posts = await fetchAllPosts(filters)
-      setTimeout(() => { res.json(posts) }, 200)
-      // res.json(posts);
-  } catch (err) {
-    console.error(err);
-    res.json(err);
-  }
-})
-
-// Examples:
-// /api/posts/search?p=abc123
-app.get("/api/posts/:id", async(req: Request, res: Response) => {
-  // console.log('req.params.id in /api/posts/:id is:', req.params.id)
-  // console.log('req.params in /api/posts/:id is:', req.params)
-  // console.log('req.query in /api/posts/:id is:', req.query)
-  // console.log('req in /api/posts/:id is:', req)
-  // console.log('req.query.target in /api/posts/:id is:', req.query.target)
-  try {
-    console.log('req.query.p in /api/posts/:id in api/index.js is:', req.query.p)
-    if (req.query.p) {
-      const post = await fetchPostById(req.query.p)
-      if (post) {
-        console.log('index.js - post has been found for req.query.p:', req.query.p)
-        const setRes = () => res.json(post)
-        setTimeout(setRes, 300)
-        // res.json(post)
-        return;
-      }
-    }
-
-    console.log('index.js - post has not been found for req.query.p:', req.query.p)
-
-    if (req.params.id && req.params.id !== 'search') {
-      const post = await fetchPostById(req.params.id)
-      if (post) {
-        const setRes = () => res.json(post)
-        setTimeout(setRes, 300)
-        // res.json(post);
-        return
-      }
-
-    }
-
-    const setRes = () => res.json({ error: 'post has not been found' })
-    setTimeout(setRes, 300)
-    // res.json({ error: 'post has not been found' })
-    return
-  } catch (err) {
-    console.error(err);
-    res.json(err);
-  }
-})
-
-// Fetch latest comments
-app.get("/api/comments/", async(req: Request, res: Response) => {
-  console.log("/api/comments/ called") 
-  const q: QueryFeedFilters = req.query
-  const filters: FeedFilters = {
-    webType: q.webType && q.webType !== 'false' ? q.webType : null,
-    category: q.category && q.category !== 'false' ? q.category : null,
-    platform: q.platform && q.platform !== 'false' ? q.platform : null,
-    source: q.source && q.source !== 'false' ? q.source : null,
-    activity: q.activity && q.activity !== 'false' ? q.activity : null,
-    keyword: q.keyword && q.keyword !== 'false' ? q.keyword : null,
-    ticker: q.ticker && q.ticker !== 'false' ? q.ticker : null,
-    limitWeb2: q.limitWeb2 && q.limitWeb2 !== 'false' ? q.limitWeb2 : null,
-    limitWeb3: q.limitWeb3 && q.limitWeb3 !== 'false' ? q.limitWeb3 : null
-  }
-  try {
-    const latestComments = await fetchLatestComments(filters)
-    res.json(latestComments);
-  } catch (err) {
-    console.error(err);
-  }
-})
-
-// Fetch all comments a target has
-app.get("/api/targets/comments/:id", async(req: Request, res: Response) => {
-  const target = req.query.target;
-  console.log(`/api/targets/comments/:id called with target: ${target}`) 
-  console.log("query:", req.query);
-
-  try {
-    const allCommentsForOneTarget = await fetchTargetComments(target)
-    res.json(allCommentsForOneTarget);
-  } catch (err) {
-    console.error(err);
-  }
-})
-
-// Fetch all actions an author submitted
-// "/api/authors/0xf8553015220a857eda377a1e903c9e5afb3ac2fa?limit=30",
-// "/api/authors/0xf8553015220a857eda377a1e903c9e5afb3ac2fa"
-// Supports RSS:
-// "/api/authors/0xf8553015220a857eda377a1e903c9e5afb3ac2fa?format=rss"
-// TODO: This API should be deprecated in favor of:
-// "/api/events?signer=0xf8553015220a857eda377a1e903c9e5afb3ac2fa",
-app.get("/api/authors/:id", async(req: Request, res: Response) => {
-  const protocol = req.protocol;
-  const host = req.get('host');
-  const originalUrl = req.originalUrl;
-  const fullUri = `${protocol}://${host}${originalUrl}`;
-  // const fullUrl = req.url;
-
-  const q: QueryFeedFiltersV2 = req.query
-  const filters: FeedFiltersV2 = {
-    format: q.format && q.format !== 'false' ? q.format : null,
-    // webType: q.webType && q.webType !== 'false' ? q.webType : null,
-    // action: q.action && q.action !== 'false' ? q.action : null,
-    // category: q.category && q.category !== 'false' ? q.category : null,
-    // source: q.source && q.source !== 'false' ? q.source : null,
-    // activity: q.activity && q.activity !== 'false' ? q.activity : null,
-    // keyword: q.keyword && q.keyword !== 'false' ? q.keyword : null,
-    limit: q.limit && q.limit !== 'false' ? q.limit : null,
-  }
-
-  // Show a few events if no query is passed
-  if (!isObjectWithValues(q)) { filters.limit = 25 }
-
-  try {
-    if (
-      req?.params?.id && typeof (req?.params?.id) === "string"
-    ) {
-      const spasmEvents = await fetchAllSpasmEventsV2BySigner(
-        req.params.id, filters, poolDefault, "spasm_events"
-      )
-      // RSS feed
-      if (
-        "format" in filters && filters.format &&
-        filters.format === "rss"
-      ) {
-        const rssFeedConfig = copyOf(defaultRssFeedConfig)
-        rssFeedConfig.filters = filters
-        if (fullUri && typeof(fullUri) === "string") {
-          rssFeedConfig.channel.fullUri = fullUri
-        }
-        const rssFeed: string = spasm
-          .generateRssFeed(spasmEvents, rssFeedConfig)
-
-        if (rssFeed) {
-          setTimeout(() => {
-            res.set('Content-Type', 'application/rss+xml')
-            res.send(rssFeed) }, 200)
-        } else { setTimeout(() => {res.json(null)}, 200) }
-
-      // Spasm feed (default)
-      } else if (isArrayWithValues(spasmEvents)) {
-        const spasmEventEnvelopes: SpasmEventEnvelopeV2[] =
-          spasm.convertManyToSpasmEventEnvelope(spasmEvents)
-
-        if (isArrayWithValues(spasmEventEnvelopes)) {
-          setTimeout(() => {res.json(spasmEventEnvelopes)}, 200)
-        } else {
-          setTimeout(() => {res.json(null)}, 200)
-        }
-      } else {
-        setTimeout(() => {res.json(null)}, 200)
-      }
-    }
-  } catch (err) {
-    console.error(err);
-    res.json(err);
-  }
-})
-
-// Fetch all children of parent events
-// Examples:
-// /api/events/children/search?id=abc123
-// /api/events/children/search?id=abc123&id=xyz
-// /api/events/children/search?id=abc123&id=xyz&action=any
-// /api/events/children/search?id=abc123&id=xyz&action=reply
-// /api/events/children/search?id=abc123&action=reply&action=react
-app.get("/api/events/children/:id", async(
-  req: Request, res: Response
-) => {
-  try {
-    if (req?.query?.id) {
-      const action = req?.query?.action
-      const actions = Array.isArray(action) ? action : [action]
-      const actionsStrings: string[] = []
-      actions.forEach(action => {
-        if (String(action)) {actionsStrings.push(String(action))}
-      })
-
-      const id = req?.query?.id
-      const ids = Array.isArray(id) ? id : [id]
-      const idsStrings: string[] = []
-      ids.forEach(id => {
-        if (String(id)) { idsStrings.push(String(id)) }
-      })
-      const spasmEventsFinal: SpasmEventV2[] = []
-
-      for (const actionStr of actionsStrings) {
-        const spasmEvents =
-          await fetchAllSpasmEventsV2ByParentIds(
-            idsStrings, poolDefault, actionStr, "spasm_events"
-          )
-        if (isArrayWithValues(spasmEvents)) {
-          spasmEvents.forEach(spasmEvent => {
-            spasm.appendToArrayIfEventIsUnique(
-              spasmEventsFinal, spasmEvent
-            )
-          })
-        }
-      }
-
-      if (isArrayWithValues(spasmEventsFinal)) {
-        // Convert all SpasmEvent to SpasmEventEnvelope
-        const spasmEventEnvelopes: SpasmEventEnvelopeV2[] =
-          spasm.convertManyToSpasmEventEnvelope(spasmEventsFinal)
-
-        if (isArrayWithValues(spasmEventEnvelopes)) {
-          setTimeout(() => {res.json(spasmEventEnvelopes)}, 200)
-        } else {
-          setTimeout(() => {res.json(null)}, 200)
-        }
-      } else {
-        setTimeout(() => {res.json(null)}, 200)
-      }
-    }
-  } catch (err) {
-    console.error(err);
-    res.json(err);
-  }
-})
 
 // Fetch full ID from a short ID
 // Used to shorten IDs/signatures in long URLs
@@ -343,31 +87,10 @@ app.post("/api/submit/", async (req: Request, res: Response) => {
     ? req.body.unknownEvent
     : req.body
 
-  console.log("event:", event)
-  // Submit V2
   const submitResult = await submitSpasmEvent(event);
-
-  // TODO delete after full transition to V2
-  // Submit V0/V1
-  // if (!("type" in event)) { await submitAction(req.body) }
-
   return res.json(submitResult);
 });
 
-// For RSS tests:
-// app.get("/api/rss-fetch-testrun", async (req, res) => {
-//   console.log('/api/rss-fetch-testrun is called')
-//   if (enableRssModule && enableRssSourcesUpdates) {
-//     try {
-//       const result = await fetchPostsFromRssSources("test")
-//       return res.json(result);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   }
-// });
-
-// V2
 // Examples:
 // "/api/events?webType=web3&category=any&source=false&activity=hot&keyword=false&limit=30",
 // "/api/events?webType=web3&category=any&source=false&activity=hot&keyword=false&limit=30",
@@ -449,6 +172,7 @@ app.get("/api/events", async(req: Request, res: Response) => {
   }
 })
 
+// Fetch one event with comments (tree)
 // Examples:
 // /api/events/search?e=abc123&action=reply&commentsDepth=10
 app.get("/api/events/:id", async(req: Request, res: Response) => {
@@ -497,7 +221,7 @@ app.get("/api/events/:id", async(req: Request, res: Response) => {
         const eventWithTree =
           await buildTreeDown(event, poolDefault, maxDepth)
         if (eventWithTree && isObjectWithValues(eventWithTree)) {
-          const spasmEventEnvelopeWithTree: SpasmEventEnvelopeV2 =
+          const spasmEventEnvelopeWithTree: SpasmEventEnvelopeWithTreeV2 =
             spasm.convertToSpasmEventEnvelopeWithTree(eventWithTree)
           if (
             spasmEventEnvelopeWithTree &&
@@ -513,7 +237,7 @@ app.get("/api/events/:id", async(req: Request, res: Response) => {
         }
       } else {
         if (event && isObjectWithValues(event)) {
-          const spasmEventEnvelope: SpasmEventEnvelopeV2 =
+          const spasmEventEnvelope: SpasmEventEnvelopeWithTreeV2 =
             spasm.convertToSpasmEventEnvelope(event)
           if (
             spasmEventEnvelope &&
@@ -569,3 +293,16 @@ export const closeServer = async () => {
 };
 
 export default app;
+
+// For RSS tests:
+// app.get("/api/rss-fetch-testrun", async (req, res) => {
+//   console.log('/api/rss-fetch-testrun is called')
+//   if (enableRssModule && enableRssSourcesUpdates) {
+//     try {
+//       const result = await fetchPostsFromRssSources("test")
+//       return res.json(result);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   }
+// });

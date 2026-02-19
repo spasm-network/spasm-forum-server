@@ -27,7 +27,7 @@ afterEach(async () => {
   await closeServer()
 });
 
-describe("GET /api/posts", () => {
+describe("GET /api/events", () => {
 
   beforeAll(() => {
     // startServer(port)
@@ -38,8 +38,7 @@ describe("GET /api/posts", () => {
   });
 
  it("should return all posts", async () => {
-   const res = await request(app).get("/api/posts");
-   // const res = await request(app).get("/api/posts?limitWeb2=1&limitWeb3=0");
+   const res = await request(app).get("/api/events");
    expect(res.statusCode).toBe(200);
    // TODO: why res.body is an empty array?
    // Temporary disabled.
