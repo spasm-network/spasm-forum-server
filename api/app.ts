@@ -279,12 +279,22 @@ app.get("/api/app-config", async(_: Request, res: Response) => {
 let server;
 
 export const startServer = (port: string | number) => {
-  server = app.listen(port, async () => {
-    // Load the latest app config from database upon launch
-    await loadAppConfig()
-    console.log(`The app is listening at http://localhost:${port}`);
-  });
-};
+  if (port && typeof(port) === "string") port = Number(port)
+  // dev
+  if (typeof(port) !== "number") return
+  if (process.env.NODE_ENV === "dev") {
+    server = app.listen(port, "127.0.0.1", async () => {
+      console.log(`The app is listening at http://127.0.0.1:${port}`)
+    })
+  // prod
+  } else {
+    server = app.listen(port, async () => {
+      // Load the latest app config from database upon launch
+      await loadAppConfig()
+      console.log(`The app is listening on port ${port} (all interfaces)`)
+    })
+  }
+}
 
 export const closeServer = async () => {
   if (server) {

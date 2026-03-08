@@ -18,4 +18,5 @@
   - Use the interfaces from `types/interface.ts` for request/response shapes.
   - Prefer `format=spasm` (JSON) unless RSS is explicitly required.
   - When submitting events, send a `SpasmEventEnvelopeV2` object in the request body.
+  - When signing events, add your pubkey as lower case.
 - **Troubleshooting**: If DB permissions denied, grant usage/tables/sequences to the DB user.
