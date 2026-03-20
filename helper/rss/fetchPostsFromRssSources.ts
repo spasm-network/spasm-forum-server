@@ -81,7 +81,8 @@ export const fetchPostsFromRssSources = async (frequency) => {
         // Execute sequentially one by one
         for (const item of itemsReversed) {
           // Submit V0/V1 to 'posts' table
-          await filterData(item)
+          // TODO Deprecated. Delete after testing
+          // await filterData(item)
 
           // Submit V2 to 'spasm_events' table
           const post: SpasmEventV0 = {}
@@ -107,7 +108,7 @@ export const fetchPostsFromRssSources = async (frequency) => {
           submitSpasmEvent(post, poolDefault, customConfig)
         }
       } else {
-        console.log("data for filterData is null")
+        console.log("data for submitting event is null")
       }
 
       // data
@@ -129,81 +130,84 @@ export const fetchPostsFromRssSources = async (frequency) => {
     arr[index] = strippedFeedItem;
   }
 
+  // TODO Deprecated. Delete after testing
   // check for duplicates
-  const filterData = async (item) => {
-    try {
-      const post = await pool.query(`
-        SELECT * FROM posts WHERE url = $1`
-        , [item.link])
-      
-      console.log('logging item from filterData in ferchAllPostsFromRSS.js is temporary disabled')
-      // console.log('logging item from filterData in ferchAllPostsFromRSS.js:' item)
+  // const filterData = async (item) => {
+  //   try {
+  //     const post = await pool.query(`
+  //       SELECT * FROM posts WHERE url = $1`
+  //       , [item.link])
+  //
+  //     console.log('logging item from filterData in ferchAllPostsFromRSS.js is temporary disabled')
+  //     // console.log('logging item from filterData in ferchAllPostsFromRSS.js:' item)
+  //
+  //     post.rowCount > 0
+  //       ? console.log(item.link + " already in db")
+  //       : insertData(item)
+  //     console.log("================================")
+  //   } catch (err) {
+  //     console.error('filterData failed', err);
+  //   }
+  // };
 
-      post.rowCount > 0
-        ? console.log(item.link + " already in db")
-        : insertData(item)
-      console.log("================================")
-    } catch (err) {
-      console.error('filterData failed', err);
-    }
-  };
-
+  // TODO: Deprecated. Delete after testing
   // Don't insert a post if it has been previously banned, e.g.,
   // via the 'delete' moderation event by valid moderators.
-  const isPostBanned = async (
-    url: string
-  ): Promise<boolean> => {
-    if (!url) return false
-    console.log(`checking if this url/guid is banned: ${url}`)
+  // const isPostBanned = async (
+  //   url: string
+  // ): Promise<boolean> => {
+  //   if (!url) return false
+  //   console.log(`checking if this url/guid is banned: ${url}`)
+  //
+  //   const tableName = 'actions'
+  //   const deleteAction = 'moderate'
+  //   const deleteText = 'delete'
+  //
+  //   try {
+  //     const checkSignature = await pool.query(`
+  //       SELECT * FROM ${tableName}
+  //       WHERE target = $1
+  //       AND action = $2
+  //       AND text = $3`
+  //       , [url, deleteAction, deleteText])
+  //     return checkSignature.rowCount > 0 ? true : false
+  //   } catch (err) {
+  //     console.error('isPostBanned failed', url, err);
+  //     return false
+  //   }
+  // };
 
-    const tableName = 'actions'
-    const deleteAction = 'moderate'
-    const deleteText = 'delete'
-
-    try {
-      const checkSignature = await pool.query(`
-        SELECT * FROM ${tableName}
-        WHERE target = $1
-        AND action = $2
-        AND text = $3`
-        , [url, deleteAction, deleteText])
-      return checkSignature.rowCount > 0 ? true : false
-    } catch (err) {
-      console.error('isPostBanned failed', url, err);
-      return false
-    }
-  };
-
+  // TODO: Deprecated. Delete after testing
   // insert item into database
-  const insertData = async (item) => {
-    console.log("inserting data")
-
-    if (await isPostBanned(item?.link)) {
-      console.log("The url is banned:", item?.link)
-      return `The url is banned: ${item?.link}`
-    }
-
-    if (await isPostBanned(item?.guid)) {
-      console.log("The guid is banned:", item?.guid)
-      return `The guid is banned: ${item?.guid}`
-    }
-
-    try {
-      const newPost = await pool.query(`
-        INSERT INTO posts (guid, source, category, tickers, title, url, description, pubdate)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        ON CONFLICT (guid) DO NOTHING`,
-        [item.guid, item.source, item.category, item.tickers, item.title, item.link, item.contentSnippet, item.pubDate]
-      );
-      // the solution below resets serial sequence after failed insertion
-      // const resetSequenceToMax = await pool.query(
-      //   "SELECT setval(pg_get_serial_sequence('posts', 'id'), MAX(id), true) FROM posts"
-      // );
-    } catch (err) {
-      // console.error('insertData failed', err);
-      console.error('insertData failed for the item.link:', item.link, 'with error message:', err);
-    }
-  };
+  // const insertData = async (item) => {
+  //   console.log("inserting data")
+  //
+  //   if (await isPostBanned(item?.link)) {
+  //     console.log("The url is banned:", item?.link)
+  //     return `The url is banned: ${item?.link}`
+  //   }
+  //
+  //   if (await isPostBanned(item?.guid)) {
+  //     console.log("The guid is banned:", item?.guid)
+  //     return `The guid is banned: ${item?.guid}`
+  //   }
+  //
+  //   try {
+  //     const newPost = await pool.query(`
+  //       INSERT INTO posts (guid, source, category, tickers, title, url, description, pubdate)
+  //       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+  //       ON CONFLICT (guid) DO NOTHING`,
+  //       [item.guid, item.source, item.category, item.tickers, item.title, item.link, item.contentSnippet, item.pubDate]
+  //     );
+  //     // the solution below resets serial sequence after failed insertion
+  //     // const resetSequenceToMax = await pool.query(
+  //     //   "SELECT setval(pg_get_serial_sequence('posts', 'id'), MAX(id), true) FROM posts"
+  //     // );
+  //   } catch (err) {
+  //     // console.error('insertData failed', err);
+  //     console.error('insertData failed for the item.link:', item.link, 'with error message:', err);
+  //   }
+  // };
 
   try {
     // Promise.all and map are used because
