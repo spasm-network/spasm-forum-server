@@ -16,64 +16,14 @@
  * directly, so we need to use a conditional check.
  */
 
+-- It's important to create two databases:
+-- main database is used to store events and other data,
+-- test database is used to run tests (npm run test).
+--  CREATE DATABASE spasm_database;
+--  CREATE DATABASE spasm_database_test;
+
 DO $$
 BEGIN
-    -- V1
-    IF NOT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' AND table_name = 'posts'
-    ) THEN
-        CREATE TABLE posts (
-            id SERIAL NOT NULL,
-            guid TEXT NOT NULL PRIMARY KEY,
-            source TEXT,
-            category TEXT,
-            tickers TEXT,
-            tags TEXT,
-            title TEXT,
-            url TEXT,
-            description TEXT,
-            pubdate TIMESTAMPTZ
-        );
-    END IF;
-    IF NOT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' AND table_name = 'actions'
-    ) THEN
-        CREATE TABLE actions (
-            id SERIAL NOT NULL,
-            target TEXT NOT NULL,
-            action TEXT,
-            category TEXT,
-            tags TEXT,
-            tickers TEXT,
-            title TEXT,
-            text TEXT,
-            signer TEXT,
-            signed_message TEXT,
-            signature TEXT,
-            signed_time TIMESTAMPTZ,
-            added_time TIMESTAMPTZ
-        );
-    END IF;
-    IF NOT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' AND table_name = 'actions_count'
-    ) THEN
-        CREATE TABLE actions_count (
-            target text NOT NULL,
-            upvote integer,
-            downvote integer,
-            bullish integer,
-            bearish integer,
-            important integer,
-            scam integer,
-            comments_count integer,
-            latest_action_added_time TIMESTAMPTZ,
-            PRIMARY KEY (target)
-        );
-    END IF;
-
     -- -- -- --
     -- V2
     IF NOT EXISTS (

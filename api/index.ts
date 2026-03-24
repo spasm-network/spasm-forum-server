@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { startServer } from './app';
 dotenv.config();
 
-const port: string = process.env.BACKEND_PORT;
+const port: string = process.env.BACKEND_PORT || "5000";
 // RSS module is disabled by default
 const enableRssModule: boolean = process.env.ENABLE_RSS_MODULE === 'true' ? true : false
 const enableRssSourcesUpdates: boolean = process.env.ENABLE_RSS_SOURCES_UPDATES === 'true' ? true : false

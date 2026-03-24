@@ -12,9 +12,20 @@ import { Client } from 'pg';
 import { escapeIdentifier } from 'pg'
 import fs from 'fs';
 import path from 'path';
+import {poolDefault} from '../db';
+import {submitSpasmEvent} from "../helper/sql/submitSpasmEvent";
+import {welcomeEvents} from "./events";
+import {
+  CustomConfigForSubmitSpasmEvent,
+  FeedFiltersV2
+} from "../types/interfaces";
+import {
+  fetchAllSpasmEventsV2ByFilter
+} from "../helper/sql/sqlUtils";
+import {isObjectWithValues} from "../helper/utils/utils";
 require('dotenv').config()
 
-const absolutePath = path.resolve(__dirname, '../databaseV2.sql')
+const absolutePath = path.resolve(__dirname, '../database.sql')
 
 export async function createDatabase(
   databaseName: string,
@@ -360,11 +371,11 @@ export const verifyDbTables = async (
   ifTryToAutoFixProblems = false
 ): Promise<boolean> => {
   console.log("verifyDbTables called")
-  const tablePosts = await verifyTableStructure(
-    'posts', expectedColumnsPosts,
-    dbConfig, ifTryToAutoFixProblems
-  );
-  if (!tablePosts) { return false }
+  // const tablePosts = await verifyTableStructure(
+  //   'posts', expectedColumnsPosts,
+  //   dbConfig, ifTryToAutoFixProblems
+  // );
+  // if (!tablePosts) { return false }
 
   const tableSpasmEvents = await verifyTableStructure(
     'spasm_events', expectedColumnsSpasmEvents,
@@ -410,7 +421,8 @@ const initializeDatabase = async (
   databaseName = dbName,
   dbConfigWithoutDatabase = DB_CONFIG_DEFAULT_WITHOUT_DATABASE,
   dbConfig = DB_CONFIG_DEFAULT,
-  ifTryToAutoFixProblems = false
+  ifTryToAutoFixProblems = false,
+  ifAddWelcomeEvents: boolean = false
 ): Promise<boolean> => {
   await createDatabase(databaseName, dbConfigWithoutDatabase)
 
@@ -424,6 +436,32 @@ const initializeDatabase = async (
 
   if (verificationStep) {
     console.log("All tables have correct structures.")
+    if (ifAddWelcomeEvents) {
+      const ifDbHasEvents = await checkIfDatabaseHasAnyEvents()
+      if (ifDbHasEvents) {
+        console.log("Database already has some events.")
+        console.log("Skipping adding welcome events.")
+      } else {
+        console.log("Database is empty.")
+        console.log("Trying to add welcome events to db...")
+        for (const event of welcomeEvents) {
+          // Bypass whitelisting for welcome events
+          const submitConfig: CustomConfigForSubmitSpasmEvent = {
+            whitelist: {
+              action: {
+                post: { enabled: false },
+                react: { enabled: false },
+                reply: { enabled: false },
+              }
+            }
+          }
+          const submitResult = await submitSpasmEvent(
+            event, poolDefault, submitConfig
+          )
+          console.log("submitResult:", submitResult)
+        }
+      }
+    }
   } else {
     console.log("Some tables have incorrect structure.")
     console.log("Aborting...")
@@ -435,6 +473,7 @@ const initializeDatabase = async (
 }
 
 export const initializeDatabaseMain = async (
+  ifAddWelcomeEvents: boolean = true
 ): Promise<boolean> => {
   console.log("Initialize a main database.")
   return await initializeDatabase(
@@ -442,7 +481,8 @@ export const initializeDatabaseMain = async (
     DB_CONFIG_DEFAULT_WITHOUT_DATABASE,
     DB_CONFIG_DEFAULT,
     // Try to auto-fix issues (might mess up db)
-    true
+    true,
+    ifAddWelcomeEvents
   )
 }
 
@@ -458,3 +498,16 @@ export const initializeDatabaseTest = async (
   )
 }
 
+export const checkIfDatabaseHasAnyEvents = async (
+): Promise<boolean> => {
+    const filters: FeedFiltersV2 = { limit: 1 }
+    const spasmEvents =
+      await fetchAllSpasmEventsV2ByFilter(filters)
+    if (
+      spasmEvents && Array.isArray(spasmEvents) &&
+      spasmEvents[0] && isObjectWithValues(spasmEvents[0])
+    ) {
+      return true
+    }
+  return false
+}

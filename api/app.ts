@@ -28,6 +28,7 @@ import {
 import {poolDefault} from "../db";
 import { env, loadAppConfig } from "./../appConfig";
 import {toBeHex} from "../helper/utils/nostrUtils";
+import {checkIfDatabaseHasAnyEvents} from "../db/dbUtils";
 
 const { spasm } = require('spasm.js');
 
@@ -127,20 +128,43 @@ const fetchEvents = async (req: Request, res: Response) => {
       limit: q.limit && q.limit !== 'false' ? q.limit : null,
     }
 
-    // Overwrite format if "rss" is in the path
-    const isPathRss = originalUrl.includes('/api/rss')
-    if (isPathRss && filters) { filters.format = "rss" }
+    if (filters) {
+      // Overwrite format if "rss" is in the path
+      if (originalUrl.includes('/api/rss')) {
+        filters.format = "rss"
+      }
+      if (originalUrl.includes('/api/spasm')) {
+        filters.format = "spasm"
+      }
 
-    // Overwrite activity based on the path
-    const isPathAll = originalUrl.includes('/api/rss-all')
-    if (isPathAll && filters) { filters.activity = "all" }
-    const isPathRising = originalUrl.includes('/api/rss-rising')
-    if (isPathRising && filters) { filters.activity = "rising" }
-    const isPathHot = originalUrl.includes('/api/rss-hot')
-    if (isPathHot && filters) { filters.activity = "hot" }
+      // Overwrite activity based on the path
+      if (
+        originalUrl.includes('/api/rss/all') ||
+        originalUrl.includes('/api/spasm/all')
+      ) {
+        filters.activity = "all"
+        if (!filters.action) { filters.action = ["post"] }
+      }
 
-    // Show a few events if no query is passed
-    if (!isObjectWithValues(q)) { filters.limit = 25 }
+      if (
+        originalUrl.includes('/api/rss/rising') ||
+        originalUrl.includes('/api/spasm/rising')
+      ) {
+        filters.activity = "rising"
+        if (!filters.action) { filters.action = ["post"] }
+      }
+
+      if (
+        originalUrl.includes('/api/rss/hot') ||
+        originalUrl.includes('/api/spasm/hot')
+      ) {
+        filters.activity = "hot"
+        if (!filters.action) { filters.action = ["post"] }
+      }
+
+      // Show a few events if no query is passed
+      if (!isObjectWithValues(q)) { filters.limit = 25 }
+    }
 
     const spasmEvents = await fetchAllSpasmEventsV2ByFilter(
       filters, poolDefault, "spasm_events"
@@ -187,12 +211,15 @@ const fetchEvents = async (req: Request, res: Response) => {
 // "/api/spasm" path helps distinguish Spasm instances from
 // other websites, which is important for the universal
 // agnostic fetchEvents() function used by AI agents.
-app.get("/api/spasm", fetchEvents)
 app.get("/api/events", fetchEvents)
+app.get("/api/spasm", fetchEvents)
+app.get("/api/spasm/all", fetchEvents)
+app.get("/api/spasm/rising", fetchEvents)
+app.get("/api/spasm/hot", fetchEvents)
 app.get("/api/rss", fetchEvents)
-app.get("/api/rss-all", fetchEvents)
-app.get("/api/rss-rising", fetchEvents)
-app.get("/api/rss-hot", fetchEvents)
+app.get("/api/rss/all", fetchEvents)
+app.get("/api/rss/rising", fetchEvents)
+app.get("/api/rss/hot", fetchEvents)
 
 // Fetch one event with comments (tree)
 // Examples:
@@ -297,6 +324,17 @@ app.get("/api/app-config", async(_: Request, res: Response) => {
     res.json(appConfig)
   }
 })
+
+app.get('/api/health', async (_, res) => {
+  const dbOk = await checkIfDatabaseHasAnyEvents()
+  const healthy = dbOk
+  res.status(healthy ? 200 : 503).json({
+    ok: true,
+    // uptime: process.uptime(),
+    database: healthy,
+    timestamp: new Date().toISOString(),
+  });
+});
 
 let server;
 

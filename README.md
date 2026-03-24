@@ -18,7 +18,7 @@ By default, user `postgres` doesn't have a password on Ubuntu, so the backend wi
 ```
 sudo su - postgres
 psql
-CREATE USER dbuser WITH PASSWORD 'dbuser';
+CREATE USER dbuser WITH PASSWORD 'some_password';
 CREATE DATABASE spasm_database WITH OWNER = dbuser;
 CREATE DATABASE spasm_database_test WITH OWNER = dbuser;
 exit
@@ -34,53 +34,66 @@ nano .env
 Example:
 
 ```
-POSTGRES_PASSWORD=dbuser
+POSTGRES_PASSWORD=some_password
 POSTGRES_USER=dbuser
 ```
 
-To create all tables in a new database, execute the code from `database.sql`.
+#### Tables
 
-Note: skip lines `CREATE DATABASE spasm_database;` and `CREATE DATABASE spasm_database_test;` because we've already created databases in the step above.
+##### Option 1. Create tables using npm script
+
+If you already created a database, then this script will create all necessary tables.
+
+```bash
+# install dependencies
+npm ci
+
+# initialize database
+npm run initialize-db
+```
+
+However, if you didn't create a database yet, then you might get a "permission denied" error because this initialization script requires a database user to have a privilege to create new databases. If your database user doesn't have that privilege, then you can grant it by executing the following SQL command from a superuser:
+
+```
+sudo su - postgres
+psql
+ALTER USER your_username CREATEDB;
+exit
+exit
+```
+
+Then try again:
+
+```bash
+npm run initialize-db
+```
+
+##### Option 2. Create tables manually
+
+To create all tables in a new database manually, execute the code from `database.sql`.
+
+Note: skip lines `CREATE DATABASE spasm_database;` and `CREATE DATABASE spasm_database_test;` because we've already created databases in the steps above.
 
 ```
 sudo su - postgres
 psql -h localhost -d spasm_database -U dbuser -p 5432
 DO $$
 BEGIN
-    -- V1
+BEGIN
     IF NOT EXISTS (
         SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' AND table_name = 'posts'
+        WHERE table_schema = 'public' AND table_name = 'spasm_events'
     ) THEN
-        CREATE TABLE posts (
+        CREATE TABLE spasm_events (
 ...
 ```
 
-Note: table `posts` is not necessary if you disable web2 posts. However, it's suggested to create table `posts` to avoid any errors.
-
-Alternatively, you can use scripts `npm run initialize-db` or `npm run migrate`, which will attempt to create new main and test databases, as well as all the necessary tables and indices.
-
-However, these scripts require a database user to have a privilege to create a new database. If your database user doesn't have that privilege, then you can grant it by executing the following SQL command from a superuser:
-
-```
-ALTER USER your_username CREATEDB;
-```
-
-Once your database user has a privilege to create new databases, you can run scripts `npm run initialize-db` or `npm run migrate` again.
 
 ### Tables
 
-##### Tables V2
-
 Table `spasm_events` contains all signed user-generated events and unsigned web2 posts (RSS).
 
-##### Tables V1
-
-Table `posts` contains web2 posts (not signed with any private key), usually fetched from RSS sources.
-
-Table `actions` contains all web3 actions that are signed with a private key.
-
-Table `actions_count` contains the number of reactions received by the target action from other actions on this server.
+Table `app_configs` contains all signed admin-generated events with Spasm node configuration. Only the latest config event matters.
 
 ## Install
 
@@ -104,16 +117,13 @@ nvm use 20
 
 # update npm
 npm install -g npm
-
-# install packages
-npm ci
 ```
 
 ---
 
 ## Download the app
 
-Download the app from the Github into the `backend/` folder.
+Download the code into the `backend/` folder.
 
 *Note: the app should already be downloaded if you've used scripts for an automated [initial server setup](https://github.com/spasm-network/spasm-forum-scripts).*
 
@@ -181,12 +191,15 @@ Open a browser and test API at `localhost:5000/api/events`.
 
 Run with pm2
 
-```
+```bash
 # Install pm2
 npm i pm2 -g
 
 # To make sure app starts after reboot
 pm2 startup
+
+# install packages
+npm ci
 
 # Run the app
 npm run prod
