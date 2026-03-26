@@ -121,7 +121,7 @@ export const updateAppConfig = async (
   ) { return null }
 
   const newEnv = copyOf(env)
-// Booleans
+  // Booleans
   const updateBoolean = (key: AppConfigKeyBoolean) => {
     if (
       key in appConfig && typeof(appConfig[key]) === "boolean"

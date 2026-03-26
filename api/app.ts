@@ -2,7 +2,6 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { fetchFullIdsFromShortId } from "../helper/sql/fetchFullIdsFromShortId";
 import {
   QueryFeedFiltersV2,
   FeedFiltersV2,
@@ -66,22 +65,6 @@ app.use(cors())
 app.use(express.json()) // => req.body
 
 //ROUTES//
-
-// Fetch full ID from a short ID
-// Used to shorten IDs/signatures in long URLs
-// to e.g. 20 symbols instead of 132/128
-app.get("/api/short-id/:id", async(req: Request, res: Response) => {
-  const shortId = req.query.id;
-  console.log(`/api/short-id/:id called with shortId: ${shortId}`) 
-  console.log("query:", req.query);
-
-  try {
-    const allFullIdsThatMatchShortId = await fetchFullIdsFromShortId(shortId)
-    res.json(allFullIdsThatMatchShortId);
-  } catch (err) {
-    console.error(err);
-  }
-})
 
 app.post("/api/submit/", async (req: Request, res: Response) => {
   const event = req.body.unknownEvent
@@ -344,6 +327,8 @@ export const startServer = (port: string | number) => {
   if (typeof(port) !== "number") return
   if (process.env.NODE_ENV === "dev") {
     server = app.listen(port, "127.0.0.1", async () => {
+      // Load the latest app config from database upon launch
+      await loadAppConfig()
       console.log(`The app is listening at http://127.0.0.1:${port}`)
     })
   // prod

@@ -146,7 +146,7 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
         return "Success. Finished fetching Spasm source (federation)"
 
       } else {
-        console.log("data for submitAction is null")
+        console.log("data for submitting events is null")
       }
     } catch (err) {
       console.error('getData failed for source.apiUrl:', source.apiUrl, 'at', time, ', error message is hidden');
