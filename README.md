@@ -1,13 +1,17 @@
+## Deploy Spasm
+
+- Launch Spasm under three minutes with [docker/podman](https://github.com/spasm-network/spasm-docker).
+- Or set up a new server from scratch with [one script](https://github.com/spasm-network/spasm-ansible).
+
+---
+
 # Spasm Forum server
 
 spasm-forum-server is a backend for a [Spasm-powered](https://github.com/spasm-network/spasm.js) forum.
 
 spasm-forum-web repository can be found [here](https://github.com/spasm-network/spasm-forum-web).
 
-## Server setup
-
-If you don't have any experience at setting up a server, then there is a beginner-friendly guide with scripts for an automated [initial server setup](https://github.com/spasm-network/spasm-forum-scripts).
-
+This repo is for development. If you want to deploy Spasm, then check [docker/podman](https://github.com/spasm-network/spasm-docker) or [ansible](https://github.com/spasm-network/spasm-ansible).
 
 ## Postgres database
 
