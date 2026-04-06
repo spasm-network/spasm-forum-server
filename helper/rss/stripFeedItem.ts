@@ -1,7 +1,6 @@
 import {pickOnlyTheseKeysFromObject} from "../utils/utils";
 
 const DOMPurify = require('isomorphic-dompurify');
-// const { convert } = require('html-to-text');
 var TurndownService = require('turndown')
 
 // Override console.log for production
@@ -38,14 +37,8 @@ export const stripFeedItem = (feedItem) => {
   feedItem.link = DOMPurify.sanitize(feedItem.link)
   feedItem.contentSnippet = DOMPurify.sanitize(feedItem.contentSnippet)
   feedItem.pubDate = DOMPurify.sanitize(feedItem.pubDate)
+  feedItem.category = DOMPurify.sanitize(feedItem.category)
 
-  // const options = {
-  //   // wordwrap: 130,
-  //   wordwrap: false,
-  //   // ...
-  // }
-
-  // feedItem.contentSnippet = convert(feedItem.contentSnippet, options);
   // Convert HTML to markdown
   var turndownService = new TurndownService()
   feedItem.contentSnippet =
@@ -62,16 +55,12 @@ export const stripFeedItem = (feedItem) => {
     feedItem.contentSnippet = feedItem.contentSnippet.slice(0,20480.) + '...'
   }
 
-  // console.log("feedItem['content:encoded'] before pick:", feedItem['content:encoded'])
-  // console.log("feedItem.contentSnippet before pick:", feedItem.contentSnippet)
-  // console.log("feedItem.summary before pick:", feedItem.summary)
-  // console.log("feedItem.description before pick:", feedItem.description)
-
   // contentSnippet is description in rss-parser
   const finalItem = pickOnlyTheseKeysFromObject(
     feedItem, [
       "guid", "source", "tickers", "title",
-      "link", "contentSnippet", "pubDate"
+      "link", "contentSnippet", "pubDate",
+      "source", "category", "tickers"
     ]
   )
   
