@@ -44,7 +44,8 @@ const configEverythingDisabled: ConfigForSubmitSpasmEvent = {
       post: { enabled: false },
       react: { enabled: false },
       reply: { enabled: false },
-      moderate: { enabled: false }
+      moderate: { enabled: false },
+      other: { enabled: false }
     }
   },
   whitelist: {
@@ -52,6 +53,7 @@ const configEverythingDisabled: ConfigForSubmitSpasmEvent = {
       post: { enabled: false, list: [] },
       react: { enabled: false, list: [] },
       reply: { enabled: false, list: [] },
+      other: { enabled: false, list: [] },
     }
   },
   moderation: {

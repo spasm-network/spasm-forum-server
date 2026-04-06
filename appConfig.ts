@@ -45,6 +45,8 @@ const enableNewWeb3ActionsReply: boolean =
   process?.env.ENABLE_NEW_WEB3_ACTIONS_REPLY === 'false' ? false : true;
 const enableNewWeb3ActionsModerate: boolean =
   process?.env.ENABLE_NEW_WEB3_ACTIONS_MODERATE === 'false' ? false : true;
+const enableNewWeb3ActionsOther: boolean =
+  process?.env.ENABLE_NEW_WEB3_ACTIONS_OTHER === 'false' ? false : true;
 const enableNewNostrActionsAll: boolean =
   process?.env.ENABLE_NEW_NOSTR_ACTIONS_ALL === 'false' ? false : true;
 const enableNewEthereumActionsAll: boolean =
@@ -59,17 +61,32 @@ const enableShortUrlsForWeb3Actions =
 const shortUrlsLengthOfWeb3Ids: number =
   Number(process?.env?.SHORT_URLS_LENGTH_OF_WEB3_IDS) || 30;
 
-// SPASM module is disabled by default
+// SPASM module (federation) is enabled by default
 const enableSpasmModule: boolean =
-  process?.env?.ENABLE_SPASM_MODULE === 'true' ? true : false
+  process?.env?.ENABLE_SPASM_MODULE === 'false' ? false : true
 const enableSpasmSourcesUpdates: boolean =
-  process?.env?.ENABLE_SPASM_SOURCES_UPDATES === 'true' ? true : false
+  process?.env?.ENABLE_SPASM_SOURCES_UPDATES === 'false' ? false : true
+const enableFederationDefaultLists: boolean =
+  process?.env?.ENABLE_FEDERATION_DEFAULT_LISTS === 'false' ? false : true
+const enableFederationDefaultListOfficial: boolean =
+  process?.env?.ENABLE_FEDERATION_DEFAULT_LIST_OFFICIAL === 'false' ? false : true
+const enableFederationDefaultListCrypto: boolean =
+  process?.env?.ENABLE_FEDERATION_DEFAULT_LIST_CRYPTO === 'false' ? false : true
+const enableFederationDefaultListPrivacy: boolean =
+  process?.env?.ENABLE_FEDERATION_DEFAULT_LIST_PRIVACY === 'false' ? false : true
+const enableFederationDefaultListTech: boolean =
+  process?.env?.ENABLE_FEDERATION_DEFAULT_LIST_TECH === 'false' ? false : true
+const enableFederationDefaultListPolitics: boolean =
+  process?.env?.ENABLE_FEDERATION_DEFAULT_LIST_POLITICS === 'false' ? false : true
+
 const ignoreWhitelistForActionPostInSpasmModule: boolean =
   process?.env?.IGNORE_WHITELIST_FOR_ACTION_POST_IN_SPASM_MODULE === 'false' ? false : true
 const ignoreWhitelistForActionReactInSpasmModule: boolean =
   process?.env?.IGNORE_WHITELIST_FOR_ACTION_REACT_IN_SPASM_MODULE === 'false' ? false : true
 const ignoreWhitelistForActionReplyInSpasmModule: boolean =
   process?.env?.IGNORE_WHITELIST_FOR_ACTION_REPLY_IN_SPASM_MODULE === 'false' ? false : true
+const ignoreWhitelistForActionOtherInSpasmModule: boolean =
+  process?.env?.IGNORE_WHITELIST_FOR_ACTION_OTHER_IN_SPASM_MODULE === 'false' ? false : true
 
 // RSS module is disabled by default
 const enableRssModule: boolean =
@@ -79,7 +96,7 @@ const enableRssSourcesUpdates: boolean =
 
 // RSS feed is enabled by default
 const enableRssFeedChannel: boolean =
-  process.env.ENABLE_RSS_FEED === 'false' ? false : true
+  process.env.ENABLE_RSS_FEED_CHANNEL === 'false' ? false : true
 const rssFeedChannelTitle: string =
   process.env.RSS_FEED_CHANNEL_TITLE || "Spasm forum";
 const rssFeedChannelLink: string =
@@ -102,6 +119,10 @@ const enableWhitelistForActionReact: boolean =
   process?.env?.ENABLE_WHITELIST_FOR_ACTION_REACT === 'true' ? true : false;
 const whitelistedForActionReact: string[] =
   splitIntoArray(process?.env?.WHITELISTED_FOR_ACTION_REACT)
+const enableWhitelistForActionOther: boolean =
+  process?.env?.ENABLE_WHITELIST_FOR_ACTION_OTHER === 'true' ? true : false;
+const whitelistedForActionOther: string[] =
+  splitIntoArray(process?.env?.WHITELISTED_FOR_ACTION_OTHER)
 const pinnedIds: string[] =
   splitIntoArray(process?.env?.PINNED_IDS)
 
@@ -133,6 +154,7 @@ export const updateAppConfig = async (
   updateBoolean("enableNewWeb3ActionsReact")
   updateBoolean("enableNewWeb3ActionsReply")
   updateBoolean("enableNewWeb3ActionsModerate")
+  updateBoolean("enableNewWeb3ActionsOther")
   updateBoolean("enableNewNostrActionsAll")
   updateBoolean("enableNewEthereumActionsAll")
   updateBoolean("enableModeration")
@@ -140,14 +162,22 @@ export const updateAppConfig = async (
   updateBoolean("enableWhitelistForActionPost")
   updateBoolean("enableWhitelistForActionReply")
   updateBoolean("enableWhitelistForActionReact")
+  updateBoolean("enableWhitelistForActionOther")
   updateBoolean("enableSpasmModule")
   updateBoolean("enableSpasmSourcesUpdates")
+  updateBoolean("enableFederationDefaultLists"),
+  updateBoolean("enableFederationDefaultListOfficial"),
+  updateBoolean("enableFederationDefaultListCrypto"),
+  updateBoolean("enableFederationDefaultListPrivacy"),
+  updateBoolean("enableFederationDefaultListTech"),
+  updateBoolean("enableFederationDefaultListPolitics"),
   updateBoolean("enableRssModule")
   updateBoolean("enableRssSourcesUpdates")
   updateBoolean("enableRssFeedChannel")
   updateBoolean("ignoreWhitelistForActionPostInSpasmModule")
   updateBoolean("ignoreWhitelistForActionReactInSpasmModule")
-  updateBoolean("ignoreWhitelistForActionReplyInSpasmModul")
+  updateBoolean("ignoreWhitelistForActionReplyInSpasmModule")
+  updateBoolean("ignoreWhitelistForActionOtherInSpasmModule")
 
   // Arrays
   const updateArray = (key: AppConfigKeyArray) => {
@@ -161,6 +191,7 @@ export const updateAppConfig = async (
   updateArray("whitelistedForActionPost")
   updateArray("whitelistedForActionReply")
   updateArray("whitelistedForActionReact")
+  updateArray("whitelistedForActionOther")
   updateArray("pinnedIds")
 
   // Numbers
@@ -275,6 +306,7 @@ export let env = {
   enableNewWeb3ActionsReact,
   enableNewWeb3ActionsReply,
   enableNewWeb3ActionsModerate,
+  enableNewWeb3ActionsOther,
   enableNewNostrActionsAll,
   enableNewEthereumActionsAll,
   enableModeration,
@@ -287,10 +319,18 @@ export let env = {
   whitelistedForActionReply,
   enableWhitelistForActionReact,
   whitelistedForActionReact,
+  enableWhitelistForActionOther,
+  whitelistedForActionOther,
   pinnedIds,
   feedFiltersActivityHot,
   feedFiltersActivityRising,
   enableSpasmModule,
+  enableFederationDefaultLists,
+  enableFederationDefaultListOfficial,
+  enableFederationDefaultListCrypto,
+  enableFederationDefaultListPrivacy,
+  enableFederationDefaultListTech,
+  enableFederationDefaultListPolitics,
   enableSpasmSourcesUpdates,
   enableRssModule,
   enableRssSourcesUpdates,
@@ -301,5 +341,6 @@ export let env = {
   rssFeedChannelImageLink,
   ignoreWhitelistForActionPostInSpasmModule,
   ignoreWhitelistForActionReactInSpasmModule,
-  ignoreWhitelistForActionReplyInSpasmModule
+  ignoreWhitelistForActionReplyInSpasmModule,
+  ignoreWhitelistForActionOtherInSpasmModule
 }

@@ -662,11 +662,13 @@ export interface StandardizedEvent {
 }
 
 export interface SpasmEventSource {
+  network?: "spasm" | "nostr" | "rss"
   name?: string
   uiUrl?: string
   apiUrl?: string
   query?: string
   showSource?: boolean
+  category?: string | number | SpasmEventCategoryV2
 }
 
 // TODO delete after fully migrating to V2 (submitSpasmEvent)
@@ -740,6 +742,7 @@ export interface AppConfig {
   enableNewWeb3ActionsReply?: boolean
   enableNewWeb3ActionsReact?: boolean
   enableNewWeb3ActionsModerate?: boolean
+  enableNewWeb3ActionsOther?: boolean
   enableNewNostrActionsAll?: boolean
   enableNewEthereumActionsAll?: boolean
   enableModeration?: boolean
@@ -747,18 +750,29 @@ export interface AppConfig {
   enableWhitelistForActionPost?: boolean
   enableWhitelistForActionReply?: boolean
   enableWhitelistForActionReact?: boolean
+  enableWhitelistForActionOther?: boolean
   enableSpasmModule?: boolean
   enableSpasmSourcesUpdates?: boolean
+  enableFederationDefaultLists?: boolean
+  enableFederationDefaultListOfficial?: boolean
+  enableFederationDefaultListCrypto?: boolean
+  enableFederationDefaultListPrivacy?: boolean
+  enableFederationDefaultListTech?: boolean
+  enableFederationDefaultListPolitics?: boolean
   enableRssModule?: boolean
   enableRssSourcesUpdates?: boolean
   ignoreWhitelistForActionPostInSpasmModule?: boolean
   ignoreWhitelistForActionReactInSpasmModule?: boolean
   ignoreWhitelistForActionReplyInSpasmModule?: boolean
+  ignoreWhitelistForActionOtherInSpasmModule?: boolean
+  // RSS feed channel
+  enableRssFeedChannel?: boolean
   // Arrays
   moderators?: string[]
   whitelistedForActionPost?: string[]
   whitelistedForActionReply?: string[]
   whitelistedForActionReact?: string[]
+  whitelistedForActionOther?: string[]
   pinnedIds?: string[]
   // Numbers
   feedFiltersActivityHot?: number
@@ -818,6 +832,10 @@ export interface AppConfig {
   birdeyeLink?: string
   geckoterminalLink?: string
   extraContactInfo?: string
+  rssFeedChannelTitle?: string
+  rssFeedChannelLink?: string
+  rssFeedChannelDescription?: string
+  rssFeedChannelImageLink?: string
 }
 
 export type AppConfigKeyString =
@@ -887,14 +905,10 @@ export type AppConfigKeyBoolean =
   | "allowNewEventsWithoutSignature"
   | "enableNewWeb3ActionsAll"
   | "enableNewWeb3ActionsPost"
-  | "enableNewWeb3ActionsReply"
-  | "enableNewWeb3ActionsReact"
-  | "enableNewWeb3ActionsModerate"
-  | "enableNewWeb3ActionsAll"
-  | "enableNewWeb3ActionsPost"
   | "enableNewWeb3ActionsReact"
   | "enableNewWeb3ActionsReply"
   | "enableNewWeb3ActionsModerate"
+  | "enableNewWeb3ActionsOther"
   | "enableNewNostrActionsAll"
   | "enableNewEthereumActionsAll"
   | "enableModeration"
@@ -903,22 +917,31 @@ export type AppConfigKeyBoolean =
   | "enableWhitelistForActionPost"
   | "enableWhitelistForActionReply"
   | "enableWhitelistForActionReact"
+  | "enableWhitelistForActionOther"
   | "feedFiltersActivityHot"
   | "feedFiltersActivityRising"
   | "enableSpasmModule"
   | "enableSpasmSourcesUpdates"
+  | "enableFederationDefaultLists"
+  | "enableFederationDefaultListOfficial"
+  | "enableFederationDefaultListCrypto"
+  | "enableFederationDefaultListPrivacy"
+  | "enableFederationDefaultListTech"
+  | "enableFederationDefaultListPolitics"
   | "enableRssModule"
   | "enableRssSourcesUpdates"
-  | "enableRssFeedChannel"
   | "ignoreWhitelistForActionPostInSpasmModule"
   | "ignoreWhitelistForActionReactInSpasmModule"
-  | "ignoreWhitelistForActionReplyInSpasmModul"
+  | "ignoreWhitelistForActionReplyInSpasmModule"
+  | "ignoreWhitelistForActionOtherInSpasmModule"
+  | "enableRssFeedChannel"
 
 export type AppConfigKeyArray =
   | "moderators"
   | "whitelistedForActionPost"
   | "whitelistedForActionReply"
   | "whitelistedForActionReact"
+  | "whitelistedForActionOther"
   | "pinnedIds"
 
 export type AppConfigKeyNumber =
@@ -974,6 +997,7 @@ export class ConfigForSubmitSpasmEvent {
       react: { enabled: boolean }
       reply: { enabled: boolean }
       moderate: { enabled: boolean }
+      other: { enabled: boolean }
     }
   }
   whitelist: {
@@ -981,6 +1005,7 @@ export class ConfigForSubmitSpasmEvent {
       post: { enabled: boolean, list: string[] }
       react: { enabled: boolean, list: string[] }
       reply: { enabled: boolean, list: string[] }
+      other: { enabled: boolean, list: string[] }
     }
   }
   moderation: {
@@ -1012,6 +1037,7 @@ export class ConfigForSubmitSpasmEvent {
         react: { enabled: settings.enableNewWeb3ActionsReact },
         reply: { enabled: settings.enableNewWeb3ActionsReply },
         moderate: { enabled: settings.enableNewWeb3ActionsModerate },
+        other: { enabled: settings.enableNewWeb3ActionsOther },
       },
     },
     this.whitelist = {
@@ -1027,6 +1053,10 @@ export class ConfigForSubmitSpasmEvent {
         reply: {
           enabled: settings.enableWhitelistForActionReply,
           list: settings.whitelistedForActionReply
+        },
+        other: {
+          enabled: settings.enableWhitelistForActionOther,
+          list: settings.whitelistedForActionOther
         },
       }
     },
@@ -1586,7 +1616,7 @@ export interface SpasmEventProofV2 {
 
 export type EventSignatureProtocol = "ethereum" | "nostr"
 
-export type SpasmEventActionV2 = "post" | "react" | "reply" | "share" | "shared" | "moderate" | "admin" | "edit" | "delete" | "vote" | "media" | "metadata" | "follow_list" | "direct_message" | "app-config-dr"
+export type SpasmEventActionV2 = "post" | "react" | "reply" | "share" | "shared" | "moderate" | "admin" | "edit" | "delete" | "vote" | "media" | "metadata" | "follow_list" | "direct_message" | "app-config-dr" | "app-config-federation-list"
 
 export type SpasmEventLicense = "MIT" | "CC0" | "CC0-1.0" | "SPDX-License-Identifier: CC0-1.0" | "SPDX-License-Identifier: MIT"
 
@@ -1799,16 +1829,25 @@ export class GenerateRssFeedConfig {
   }
   filters?: FeedFiltersV2
   customConvertToRssConfig?: CustomConvertToRssConfig
-  constructor() {
+  constructor(settings = env) {
     this.channel = {
-      title: "Spasm RSS",
-      link: "https://forum.spasm.network",
-      description: "RSS Feed of Spasm events",
+      title: settings?.rssFeedChannelTitle || "Spasm",
+      link: settings?.rssFeedChannelLink
+        || "https://forum.spasm.network",
+      description: settings?.rssFeedChannelDescription
+        || "RSS Feed of Spasm events",
       language: "en-us",
       lastBuildDate: new Date().toUTCString(),
-      imageUrl: "https://media.spasm.network/spasmim016863a1cae922c77a970a86e0d339455d6417c6106125b8ebac744e50f51581a9.jpeg",
+      imageUrl: settings?.rssFeedChannelImageLink
+        || "https://media.spasm.network/spasmim016863a1cae922c77a970a86e0d339455d6417c6106125b8ebac744e50f51581a9.jpeg",
       addSignerToTitle: true,
       enableAutoGeneratedNamesInTitle: true
+    }
+    this.customConvertToRssConfig = {
+      customDomain: (
+        settings?.rssFeedChannelLink ||
+        "https://forum.spasm.network"
+      ) + "/news"
     }
     this.items = {
       enableAutoGeneratedNames: true

@@ -1,19 +1,33 @@
 import fs from 'fs';
 import path from 'path';
 import axios, { AxiosResponse } from 'axios';
-import { SpasmSource, Post, IgnoreWhitelistFor, ConfigForSubmitSpasmEvent, UnknownEventV2 } from "../../types/interfaces";
+import {
+  SpasmSource,
+  Post,
+  IgnoreWhitelistFor,
+  ConfigForSubmitSpasmEvent,
+  UnknownEventV2,
+  SpasmEventSource,
+  AppConfig
+} from "../../types/interfaces";
 import {submitSpasmEvent} from '../sql/submitSpasmEvent';
 import {poolDefault} from '../../db';
-import {env} from "./../../appConfig"
+import {
+  fetchAppConfig
+} from "./../sql/sqlUtils";
+import {
+  sourcesOfficial,
+  sourcesDefaultCrypto,
+  sourcesDefaultPrivacy,
+  sourcesDefaultTech,
+  sourcesDefaultPolitics,
+  sourcesOfficialReplies,
+  sourcesDefaultCryptoReplies,
+  sourcesDefaultPrivacyReplies,
+  sourcesDefaultTechReplies,
+  sourcesDefaultPoliticsReplies,
+} from "./sources";
 // SPASM module is disabled by default
-const {
-  enableSpasmModule,
-  enableSpasmSourcesUpdates,
-  ignoreWhitelistForActionPostInSpasmModule,
-  ignoreWhitelistForActionReactInSpasmModule,
-  ignoreWhitelistForActionReplyInSpasmModule
-} = env
-
 // Override console.log for production
 if (process.env.NODE_ENV !== "dev") {
   console.log = () => {}
@@ -28,6 +42,32 @@ if (process.env.NODE_ENV !== "dev") {
  * can be changed with .env variables.
  */
 export const fetchPostsFromSpasmSources = async (frequency?: string) => {
+  const appConfig: AppConfig = await fetchAppConfig()
+  if (
+    !appConfig || typeof(appConfig) !== "object" ||
+    Array.isArray(appConfig)
+  ) {
+    console.log("cannot load appConfig")
+    return null 
+  }
+
+  // Bree doesn't get updated values from appConfig.env file,
+  // so we have to fetch appConfig every time from db.
+  const {
+    enableSpasmModule,
+    enableSpasmSourcesUpdates,
+    enableFederationDefaultLists,
+    enableFederationDefaultListOfficial,
+    enableFederationDefaultListCrypto,
+    enableFederationDefaultListPrivacy,
+    enableFederationDefaultListTech,
+    enableFederationDefaultListPolitics,
+    ignoreWhitelistForActionPostInSpasmModule,
+    ignoreWhitelistForActionReactInSpasmModule,
+    ignoreWhitelistForActionReplyInSpasmModule,
+    ignoreWhitelistForActionOtherInSpasmModule
+  } = appConfig
+
   if (!frequency) return
   if (!enableSpasmModule) return
   if (!enableSpasmSourcesUpdates) return
@@ -36,7 +76,7 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
   const time = new Date(Date.now()).toISOString();
   console.log('fetchPostsFromSpasmSources is called at:', time)
 
-  let sources = []
+  let sources: SpasmEventSource[] = []
 
   /**
     * https://github.com/breejs/bree/tree/master/examples/typescript
@@ -74,7 +114,8 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
         break
     }
   } else {
-    console.error(absolutePath, "file doesn't exist. If you want to use SPASM module, make sure to create this file and specify SPASM sources as shown in the example file in the same folder.")
+    // It's now possible to enable federation via db events
+    // console.error(absolutePath, "file doesn't exist. If you want to use SPASM module, make sure to create this file and specify SPASM sources as shown in the example file in the same folder.")
   }
 
   const getData = async (
@@ -140,6 +181,9 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
           if (ignoreWhitelistForActionReplyInSpasmModule) {
             customConfig.whitelist.action.reply.enabled = false
           }
+          if (ignoreWhitelistForActionOtherInSpasmModule) {
+            customConfig.whitelist.action.other.enabled = false
+          }
           await submitSpasmEvent(post, poolDefault, customConfig)
         }
 
@@ -155,6 +199,48 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
   };
 
   try {
+    if (enableFederationDefaultLists) {
+      if (frequency === "medium" && enableFederationDefaultListPolitics) {
+        sources.push(...sourcesDefaultPolitics)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListTech) {
+        sources.push(...sourcesDefaultTech)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListPrivacy) {
+        sources.push(...sourcesDefaultPrivacy)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListCrypto) {
+        sources.push(...sourcesDefaultCrypto)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListOfficial) {
+        sources.push(...sourcesOfficial)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListPolitics) {
+        sources.push(...sourcesDefaultPoliticsReplies)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListTech) {
+        sources.push(...sourcesDefaultTechReplies)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListPrivacy) {
+        sources.push(...sourcesDefaultPrivacyReplies)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListCrypto) {
+        sources.push(...sourcesDefaultCryptoReplies)
+      }
+
+      if (frequency === "medium" && enableFederationDefaultListOfficial) {
+        sources.push(...sourcesOfficialReplies)
+      }
+    }
+
     if (sources && sources[0]) {
       // Execute sequentially one by one
       for (const source of sources) {

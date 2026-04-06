@@ -229,6 +229,26 @@ export const submitSpasmEvent = async (
       return "ERROR: submitting new moderation actions is currently disabled"
     }
 
+    // A few checks for moderators (there will be more later)
+    if (spasmEvent.action?.startsWith('moderate')) {
+      if (!config.moderation.enabled) {
+        return "ERROR: the moderation is disabled"
+      }
+      if (
+        !Array.isArray(config.moderation.list) ||
+        !hasValue(config.moderation.list)
+      ) { return "ERROR: moderators are not set" }
+
+      const isAnySignerModerator =
+        spasm.isAnySignerListedIn(
+          spasmEvent, config.moderation.list
+      )
+      console.log("isAnySignerModerator:", isAnySignerModerator)
+      if (!isAnySignerModerator && !isAdminEvent) {
+        return "ERROR: you're not a moderator"
+      }
+    }
+
     // Abort the function if the signer is not whitelisted to
     // submit new post actions, but only if a white list is
     // enabled and ignoreWhitelist is set to false.
@@ -276,6 +296,30 @@ export const submitSpasmEvent = async (
         !isAnySignerWhitelistedForActionReact && !isAdminEvent
       ) {
         return "ERROR: this address is not whitelisted to submit new reactions"
+      }
+    }
+    // Same for other (non-standard events)
+    if ((
+        spasmEvent.action !== "post" &&
+        spasmEvent.action !== "reply" &&
+        spasmEvent.action !== "react" &&
+        spasmEvent.action !== "moderate" &&
+        spasmEvent.action !== "admin" &&
+        spasmEvent.action !== "app-config-dr" &&
+        spasmEvent.action !== "app-config-federation-list" &&
+        !spasmEvent.action?.startsWith('app-config') &&
+        !spasmEvent.action?.startsWith('admin')
+      ) &&
+      config.whitelist?.action?.other?.enabled
+    ) {
+      const isAnySignerWhitelistedForActionOther =
+        spasm.isAnySignerListedIn(
+        spasmEvent, config?.whitelist?.action?.other?.list
+      )
+      if (
+        !isAnySignerWhitelistedForActionOther && !isAdminEvent
+      ) {
+        return "ERROR: this address is not whitelisted to submit new non-standard events"
       }
     }
 
@@ -383,14 +427,6 @@ export const submitSpasmEvent = async (
       spasmEvent.action === "moderate" &&
       spasmEvent.content === "delete"
     ) {
-      if (!config.moderation.enabled) {
-        return "ERROR: the moderation is disabled"
-      }
-      if (
-        !Array.isArray(config.moderation.list) ||
-        !hasValue(config.moderation.list)
-      ) { return "ERROR: moderators are not set" }
-
       const isAnySignerModerator =
         spasm.isAnySignerListedIn(
           spasmEvent, config.moderation.list

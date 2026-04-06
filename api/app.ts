@@ -9,7 +9,8 @@ import {
   SpasmEventEnvelopeV2,
   SpasmEventEnvelopeWithTreeV2,
   AppConfig,
-  GenerateRssFeedConfig
+  GenerateRssFeedConfig,
+  SpasmEventSource
 } from "../types/interfaces";
 import {
   copyOf,
@@ -23,6 +24,7 @@ import {
   fetchSpasmEventV2ById,
   fetchSpasmEventV2ByShortId,
   fetchAppConfig,
+  fetchFederationList,
 } from "../helper/sql/sqlUtils";
 import {poolDefault} from "../db";
 import { env, loadAppConfig } from "./../appConfig";
@@ -30,23 +32,6 @@ import {toBeHex} from "../helper/utils/nostrUtils";
 import {checkIfDatabaseHasAnyEvents} from "../db/dbUtils";
 
 const { spasm } = require('spasm.js');
-
-const defaultRssFeedConfig: GenerateRssFeedConfig =
-  new GenerateRssFeedConfig()
-defaultRssFeedConfig.channel.title =
-  env?.rssFeedChannelTitle || "Spasm"
-defaultRssFeedConfig.channel.link =
-  env?.rssFeedChannelLink || "https://forum.spasm.network"
-defaultRssFeedConfig.channel.description =
-  env?.rssFeedChannelDescription || "Unplug from slave tech!"
-defaultRssFeedConfig.channel.imageUrl =
-  env?.rssFeedChannelImageLink || "https://media.spasm.network/spasmim016863a1cae922c77a970a86e0d339455d6417c6106125b8ebac744e50f51581a9.jpeg"
-defaultRssFeedConfig.customConvertToRssConfig = { 
-  customDomain: (
-    env?.rssFeedChannelLink ||
-    "https://forum.spasm.network"
-  ) + "/news"
-}
 
 dotenv.config();
 
@@ -91,6 +76,8 @@ app.post("/api/submit/", async (req: Request, res: Response) => {
 // "/api/events?format=rss&webType=web3&category=any&source=false&activity=hot&keyword=false&limit=30",
 const fetchEvents = async (req: Request, res: Response) => {
   try {
+    const defaultRssFeedConfig: GenerateRssFeedConfig =
+      new GenerateRssFeedConfig()
     const protocol = req.protocol;
     const host = req.get('host');
     const originalUrl = req.originalUrl;
@@ -293,6 +280,18 @@ app.get("/api/events/:id", async(req: Request, res: Response) => {
   } catch (err) {
     console.error(err);
     res.json(err);
+  }
+})
+
+app.get("/api/federation-list", async(_: Request, res: Response) => {
+  const federationList: SpasmEventSource[] = await fetchFederationList()
+  if (
+    !federationList || typeof(federationList) !== "object" ||
+    Array.isArray(federationList)
+  ) {
+    res.json({})
+  } else {
+    res.json(federationList)
   }
 })
 

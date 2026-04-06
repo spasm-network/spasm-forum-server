@@ -6,7 +6,8 @@ import {
   SpasmEventV2,
   UnknownEventV2,
   SpasmEventStatV2,
-  FeedFiltersV2
+  FeedFiltersV2,
+  SpasmEventSource
 } from "../../types/interfaces";
 import {
   hasValue,
@@ -1787,6 +1788,34 @@ export const incrementStatsV2ForThisEvent = async (
   //   SET (event -> 'stats' -> #>> '{action}') = (event -> 'stats' -> #>> '{action}') + 1
   //   WHERE event @> $1::jsonb
   // `;
+}
+
+export const fetchFederationList = async (
+): Promise<SpasmEventSource[] | null> => {
+  const filters: FeedFiltersV2 = {
+    action: "app-config-federation-list",
+    limit: 1
+  }
+  const spasmEvents: SpasmEventV2[] =
+    await fetchAllAppConfigsByFilters(filters)
+  if (!spasmEvents) return null
+  if (!isArrayWithValues(spasmEvents)) return null
+  if (!spasmEvents[0]) return null
+  const spasmEvent: SpasmEventV2 = spasmEvents[0]
+  const isAnySignerAdmin =
+    spasm.isAnySignerListedIn(spasmEvent, env.admins)
+  if (!isAnySignerAdmin) {
+    console.error("ERROR: a signer of a federation list event from the database is not an admin, so list is rejected. That's unusual. There are at least three different explanations: (1) you didn't update your federation list after changing admins, (2) you didn't set admins after restoring a database backup, (3) a malicious actor was able to submit a federation list from a non-admin address. Make sure that admins are properly set in the .env file, restart the app, and try to update your federation list.")
+    return null
+  }
+  if (!('content' in spasmEvent)) return null
+  if (!spasmEvent.content) return null
+  if (typeof(spasmEvent.content) !== "string") return null
+  const federationList = JSON.parse(spasmEvent.content)
+  if (!federationList) return null
+  // if (typeof(federationList) !== "object") return null
+  if (!Array.isArray(federationList)) return null
+  return federationList
 }
 
 export const fetchAppConfig = async (
