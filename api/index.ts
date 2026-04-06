@@ -12,13 +12,11 @@ const enableRssSourcesUpdates: boolean = process.env.ENABLE_RSS_SOURCES_UPDATES 
 const rssFrequencyLowTimeInterval: string = process.env.RSS_FREQUENCY_LOW_TIME_INTERVAL || '50s'
 const rssFrequencyMediumTimeInterval: string = process.env.RSS_FREQUENCY_MEDIUM_TIME_INTERVAL || '15m'
 const rssFrequencyHighTimeInterval: string = process.env.RSS_FREQUENCY_HIGH_TIME_INTERVAL || '58m'
-// SPASM module is disabled by default
-const enableSpasmModule: boolean = process.env.ENABLE_SPASM_MODULE === 'true' ? true : false
-const enableSpasmSourcesUpdates: boolean = process.env.ENABLE_SPASM_SOURCES_UPDATES === 'true' ? true : false
+
 // Default update frequencies are set to weird numbers to minimize overlapping
-const spasmFrequencyLowTimeInterval: string = process.env.SPASM_FREQUENCY_LOW_TIME_INTERVAL || '45s'
-const spasmFrequencyMediumTimeInterval: string = process.env.SPASM_FREQUENCY_MEDIUM_TIME_INTERVAL || '12m'
-const spasmFrequencyHighTimeInterval: string = process.env.SPASM_FREQUENCY_HIGH_TIME_INTERVAL || '52m'
+const spasmFrequencyHighTimeInterval: string = process.env.SPASM_FREQUENCY_HIGH_TIME_INTERVAL || '16m'
+const spasmFrequencyMediumTimeInterval: string = process.env.SPASM_FREQUENCY_MEDIUM_TIME_INTERVAL || '59m'
+const spasmFrequencyLowTimeInterval: string = process.env.SPASM_FREQUENCY_LOW_TIME_INTERVAL || '3h'
 
 // Override console.log for production
 console.log(`NODE_ENV=${process.env.NODE_ENV}`)
@@ -53,7 +51,7 @@ if (enableRssModule && enableRssSourcesUpdates) {
   )
 }
 
-if (enableSpasmModule && enableSpasmSourcesUpdates) {
+if (true) {
   breeJobs.push(
     {
       name : 'runFetchSpasmFrequencyHigh',
@@ -98,7 +96,7 @@ const bree = new Bree({
 
 console.log("bree.config.jobs:", bree.config.jobs)
 
-if ((enableRssModule && enableRssSourcesUpdates) || (enableSpasmModule && enableSpasmSourcesUpdates)) {
+if (true) {
   console.log("starting bree")
   bree.start()
 }
