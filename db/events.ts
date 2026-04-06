@@ -223,7 +223,67 @@ export const validPostWithNostrReplyToDmpEventConvertedToSpasmV2: SpasmEventV2 =
   ]
 }
 
+const welcomeToTheFreeWorld: SpasmEventV2 = {
+  "type": "SpasmEventV2",
+  "siblings": [
+    {
+      "type": "SiblingSpasmSignedV2",
+      "protocol": {
+        "name": "spasm",
+        "version": "2.0.0"
+      },
+      "signedString": "{\"type\":\"SpasmEventBodyV2\",\"action\":\"post\",\"content\":\"Congrats, your instance is live!\\n\\nYou can now go to [admin](/admin) panel to customize your forum.\\n\\nFederation will be enabled once you save your first app config. You can also disable federation in the admin panel. Posts from the default federation list are fetched once an hour, so you have enough time to decide.\",\"title\":\"Welcome to the free world\",\"timestamp\":1775534632293,\"license\":\"SPDX-License-Identifier: CC0-1.0\",\"protocol\":{\"name\":\"spasm\",\"version\":\"2.0.0\"},\"authors\":[{\"addresses\":[{\"value\":\"0xf365322929acf86ecce69be180d3aa122903145c\",\"format\":{\"name\":\"ethereum-pubkey\"}}]}]}",
+      "signatures": [
+        {
+          "value": "0x897d3bd215de70927c76cb7d71130e63eaccb7871b8003bf8483838de20ddf13553507ddaf3ed05ea46197bd7bfff158f5ff91f707b4397217485eb1e61805841b",
+          "pubkey": "0xf365322929acf86ecce69be180d3aa122903145c",
+          "format": {
+            "name": "ethereum-sig"
+          }
+        }
+      ]
+    }
+  ],
+  "action": "post",
+  "title": "Welcome to the free world",
+  "content": "Congrats, your instance is live!\n\nYou can now go to [admin](/admin) panel to customize your forum.\n\nFederation will be enabled once you save your first app config. You can also disable federation in the admin panel. Posts from the default federation list are fetched once an hour, so you have enough time to decide.",
+  "timestamp": 1775534632293,
+  "license": "SPDX-License-Identifier: CC0-1.0",
+  "authors": [
+    {
+      "addresses": [
+        {
+          "value": "0xf365322929acf86ecce69be180d3aa122903145c",
+          "format": {
+            "name": "ethereum-pubkey"
+          },
+          "verified": true
+        }
+      ]
+    }
+  ],
+  "signatures": [
+    {
+      "value": "0x897d3bd215de70927c76cb7d71130e63eaccb7871b8003bf8483838de20ddf13553507ddaf3ed05ea46197bd7bfff158f5ff91f707b4397217485eb1e61805841b",
+      "pubkey": "0xf365322929acf86ecce69be180d3aa122903145c",
+      "format": {
+        "name": "ethereum-sig"
+      }
+    }
+  ],
+  "ids": [
+    {
+      "value": "spasmid01b160c21bd5999f99d8a9ae4e8ae8bc62244098ec4e432ec022d70a1d1ccb0f40",
+      "format": {
+        "name": "spasmid",
+        "version": "01"
+      }
+    }
+  ]
+}
+
 export const welcomeEvents: SpasmEventV2[] = [
   validDmpEventSignedClosedConvertedToSpasmV2,
-  validPostWithNostrReplyToDmpEventConvertedToSpasmV2
+  validPostWithNostrReplyToDmpEventConvertedToSpasmV2,
+  welcomeToTheFreeWorld
 ]
