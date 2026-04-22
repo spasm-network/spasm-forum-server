@@ -35,6 +35,13 @@ export const sourcesDefaultCrypto: SpasmEventSource[] = [
     query: "events?webType=any&activity=rising&action=post&category=defi&category=crypto&category=nft&category=monero&category=bitcoin&category=ethereum&category=nft&limit=5",
     showSource: true
   },
+  {
+    name: "forum.decentralizedscience.org",
+    uiUrl: "https://forum.decentralizedscience.org/news/",
+    apiUrl: "https://forum.decentralizedscience.org/api/",
+    query: "events?webType=any&activity=rising&action=post&category=defi&category=crypto&category=nft&category=monero&category=bitcoin&category=ethereum&category=nft&category=desci&category=lunar&limit=5",
+    showSource: true
+  }
 ]
 
 export const sourcesDefaultCryptoReplies: SpasmEventSource[] = [
@@ -45,6 +52,13 @@ export const sourcesDefaultCryptoReplies: SpasmEventSource[] = [
     query: "events?webType=any&activity=rising&action=reply&category=defi&category=crypto&category=nft&category=monero&category=bitcoin&category=ethereum&category=nft&limit=10",
     showSource: true
   },
+  {
+    name: "forum.decentralizedscience.org",
+    uiUrl: "https://forum.decentralizedscience.org/news/",
+    apiUrl: "https://forum.decentralizedscience.org/api/",
+    query: "events?webType=any&activity=rising&action=reply&category=defi&category=crypto&category=nft&category=monero&category=bitcoin&category=ethereum&category=nft&category=desci&category=lunar&limit=10",
+    showSource: true
+  }
 ]
 
 export const sourcesDefaultPrivacy: SpasmEventSource[] = [
