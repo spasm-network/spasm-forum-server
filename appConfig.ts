@@ -242,6 +242,13 @@ export const updateAppConfig = async (
   updateString("facebookLink")
   updateString("linkedinLink")
   updateString("wikipediaLink")
+  updateString("gitLink")
+  updateString("forgejoLink")
+  updateString("giteaLink")
+  updateString("radicleLink")
+  updateString("gitlabLink")
+  updateString("codebergLink")
+  updateString("bitbucketLink")
   updateString("githubLink")
 
   updateString("nostrNpub")

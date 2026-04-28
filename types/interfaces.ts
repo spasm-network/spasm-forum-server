@@ -805,6 +805,13 @@ export interface AppConfig {
   facebookLink?: string
   linkedinLink?: string
   wikipediaLink?: string
+  gitLink?: string
+  forgejoLink?: string
+  giteaLink?: string
+  radicleLink?: string
+  gitlabLink?: string
+  codebergLink?: string
+  bitbucketLink?: string
   githubLink?: string
   nostrNpub?: string
   sessionName?: string
@@ -865,6 +872,13 @@ export type AppConfigKeyString =
   | "facebookLink"
   | "linkedinLink"
   | "wikipediaLink"
+  | "gitLink"
+  | "forgejoLink"
+  | "giteaLink"
+  | "radicleLink"
+  | "gitlabLink"
+  | "codebergLink"
+  | "bitbucketLink"
   | "githubLink"
   | "nostrNpub"
   | "sessionName"
