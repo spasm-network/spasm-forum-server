@@ -55,7 +55,6 @@ export const submitSpasmEvent = async (
   unknownEvent: UnknownEventV2,
   pool = poolDefault,
   customConfig?: CustomConfigForSubmitSpasmEvent,
-  // ignoreWhitelistFor = new IgnoreWhitelistFor()
 ): Promise<string> => {
   let isAppConfig = false
   let isAdminEvent = false
@@ -65,7 +64,6 @@ export const submitSpasmEvent = async (
     mergeConfigsForSubmitSpasmEvent(
     defaultConfig, customConfig || {}
   )
-  // const ignoreWhitelistFor = new IgnoreWhitelistFor()
 
   if (!isObjectWithValues(unknownEvent)) {
     return "ERROR: Unknown event is empty"

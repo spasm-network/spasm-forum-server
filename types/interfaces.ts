@@ -329,26 +329,6 @@ export interface SpasmSource {
   showSource?: boolean
 }
 
-// export class IgnoreWhitelistFor {
-//   action: {
-//     post: boolean
-//     reply: boolean
-//     react: boolean
-//     moderate: boolean
-//   }
-//
-//   constructor() {
-//     this.action = {
-//       post: false,
-//       reply: false,
-//       react: false,
-//       moderate: false
-//     }
-//   }
-// }
-
-
-
 // ============================
 // Spasm.js interfaces
 
@@ -669,25 +649,6 @@ export interface SpasmEventSource {
   query?: string
   showSource?: boolean
   category?: string | number | SpasmEventCategoryV2
-}
-
-// TODO delete after fully migrating to V2 (submitSpasmEvent)
-export class IgnoreWhitelistFor {
-  action: {
-    post: boolean
-    reply: boolean
-    react: boolean
-    moderate: boolean
-  }
-
-  constructor() {
-    this.action = {
-      post: false,
-      reply: false,
-      react: false,
-      moderate: false
-    }
-  }
 }
 
 export type EventType =
