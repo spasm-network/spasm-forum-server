@@ -720,6 +720,8 @@ export interface AppConfig {
   enableFederationDefaultListPrivacy?: boolean
   enableFederationDefaultListTech?: boolean
   enableFederationDefaultListPolitics?: boolean
+  enableFederationCustomLinks?: boolean
+  enableFederationCustomSources?: boolean
   enableRssModule?: boolean
   enableRssSourcesUpdates?: boolean
   ignoreWhitelistForActionPostInSpasmModule?: boolean
@@ -735,6 +737,7 @@ export interface AppConfig {
   whitelistedForActionReact?: string[]
   whitelistedForActionOther?: string[]
   pinnedIds?: string[]
+  federationCustomLinks?: string[]
   // Numbers
   feedFiltersActivityHot?: number
   feedFiltersActivityRising?: number
@@ -903,6 +906,8 @@ export type AppConfigKeyBoolean =
   | "enableFederationDefaultListPrivacy"
   | "enableFederationDefaultListTech"
   | "enableFederationDefaultListPolitics"
+  | "enableFederationCustomLinks"
+  | "enableFederationCustomSources"
   | "enableRssModule"
   | "enableRssSourcesUpdates"
   | "ignoreWhitelistForActionPostInSpasmModule"
@@ -918,6 +923,7 @@ export type AppConfigKeyArray =
   | "whitelistedForActionReact"
   | "whitelistedForActionOther"
   | "pinnedIds"
+  | "federationCustomLinks"
 
 export type AppConfigKeyNumber =
   | "shortUrlsLengthOfWeb3Ids"

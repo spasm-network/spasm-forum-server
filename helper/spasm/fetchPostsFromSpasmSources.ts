@@ -1,10 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import axios, { AxiosResponse } from 'axios';
 import {
   SpasmSource,
   Post,
-  IgnoreWhitelistFor,
   ConfigForSubmitSpasmEvent,
   UnknownEventV2,
   SpasmEventSource,
@@ -27,6 +25,8 @@ import {
   sourcesDefaultTechReplies,
   sourcesDefaultPoliticsReplies,
 } from "./sources";
+import {isArrayWithValues} from '../utils/utils';
+const { spasm } = require('spasm.js');
 // SPASM module is disabled by default
 // Override console.log for production
 if (process.env.NODE_ENV !== "dev") {
@@ -41,7 +41,11 @@ if (process.env.NODE_ENV !== "dev") {
  * The exact time intervals of update frequencies
  * can be changed with .env variables.
  */
-export const fetchPostsFromSpasmSources = async (frequency?: string) => {
+export const fetchPostsFromSpasmSources = async (
+  frequency?: "low" | "medium" | "high" | "test"
+) => {
+  console.log("fetchPostsFromSpasmSources called")
+  console.log("frequency:", frequency)
   const appConfig: AppConfig = await fetchAppConfig()
   if (
     !appConfig || typeof(appConfig) !== "object" ||
@@ -62,6 +66,9 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
     enableFederationDefaultListPrivacy,
     enableFederationDefaultListTech,
     enableFederationDefaultListPolitics,
+    enableFederationCustomLinks,
+    // enableFederationCustomSources,
+    federationCustomLinks,
     ignoreWhitelistForActionPostInSpasmModule,
     ignoreWhitelistForActionReactInSpasmModule,
     ignoreWhitelistForActionReplyInSpasmModule,
@@ -90,6 +97,7 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
     absolutePath = path.resolve(__dirname, 'custom/customSpasmSources.js')
   }
 
+  // TODO tbc change absolutePath to db event
   // Check if a file with custom feed sources exists
   if (fs.existsSync(absolutePath)) {
     const {
@@ -124,54 +132,47 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
     try {
       if (!source.apiUrl) return "ERROR: no API URL in Spasm source"
 
-      let fetchUrl = source.apiUrl
+      // let fetchUrl = source.apiUrl
+      // if (source.query) {
+      //   fetchUrl += source.query
+      // }
+      // type ApiResponse = Post[]
+      // const response: AxiosResponse<ApiResponse> = await axios.get<ApiResponse>(fetchUrl);
 
-      if (source.query) {
-        fetchUrl += source.query
-      }
-
-      console.log("fetchUrl:", fetchUrl)
-
-      // Admins can choose to insert actions received from
-      // other instances of the network even if they were signed
-      // by non-whitelisted addresses.
-      // In other words, admins can choose to trust other
-      // instances to properly protect their instances,
-      // e.g., from spam and low-quality content.
-      const ignoreWhitelistFor = new IgnoreWhitelistFor()
-      if (ignoreWhitelistForActionPostInSpasmModule) {
-        ignoreWhitelistFor.action.post = true
-      }
-
-      type ApiResponse = Post[]
-
-      const response: AxiosResponse<ApiResponse> = await axios.get<ApiResponse>(fetchUrl);
+      const response = await spasm.fetchEventsFromSource(source)
       // console.log("response:", response)
 
-      if (response.data) {
+      if (response) {
         let arrayOfPosts: UnknownEventV2[] = []
         // 1. Handle arrays of posts/events
-        if (Array.isArray(response.data)) {
+        if (Array.isArray(response)) {
         /**
          * Reverse the order of posts/events in the response data
          * so the newest events are inserted into the database at
          * the end, so they will be shown at the top of the feed.
          */
           arrayOfPosts = arrayOfPosts.concat(
-            response.data.reverse()
+            response.reverse()
           )
         // 2. Handle single post/event as an object
         } else if (
-          !Array.isArray(response.data) &&
-          typeof(response.data) === 'object'
+          !Array.isArray(response) &&
+          typeof(response) === 'object'
         ) {
-          arrayOfPosts.push(response.data)
+          arrayOfPosts.push(response)
         }
 
         // Execute sequentially one by one
         for (const post of arrayOfPosts) {
           // Submit V2
           const customConfig = new ConfigForSubmitSpasmEvent()
+
+          // Admins can choose to insert actions received from
+          // other instances of the network even if they were
+          // signed by non-whitelisted addresses.
+          // In other words, admins can choose to trust other
+          // instances to properly protect their instances,
+          // e.g., from spam and low-quality content.
           if (ignoreWhitelistForActionPostInSpasmModule) {
             customConfig.whitelist.action.post.enabled = false
           }
@@ -238,6 +239,79 @@ export const fetchPostsFromSpasmSources = async (frequency?: string) => {
 
       if (frequency === "medium" && enableFederationDefaultListOfficial) {
         sources.push(...sourcesOfficialReplies)
+      }
+
+    }
+
+    // TODO tbc fetch federationCustomLinks
+    // const enableFederationCustomLinks = true
+    // const federationCustomLinks = [
+    //   // "https://thedefiant.io/api/feed",
+    //   // "https://blog.1inch.io/feed"
+    // ]
+    console.log("enableFederationCustomLinks:", enableFederationCustomLinks)
+    console.log("federationCustomLinks:", federationCustomLinks)
+    if (enableFederationCustomLinks) {
+      if (
+        federationCustomLinks &&
+        Array.isArray(federationCustomLinks) &&
+        isArrayWithValues(federationCustomLinks)
+      ) {
+        federationCustomLinks.forEach(link => {
+          if (link && typeof(link) === "string") {
+            const parts = link.split("|")
+            const url = parts[0] ?? ""
+            const urlObj = new URL(url)
+            const source: SpasmEventSource = {}
+            if (
+              urlObj.hostname && typeof(urlObj.hostname) === "string"
+            ) {
+              source.name = urlObj.hostname
+            } else if (urlObj.host && typeof(urlObj.host) === "string") { 
+              source.name = urlObj.host
+            }
+            if (
+              urlObj.origin && urlObj.pathname &&
+              typeof(urlObj.origin) === "string" &&
+              typeof(urlObj.pathname) === "string"
+            ) { source.apiUrl = urlObj.origin + urlObj.pathname }
+            if (urlObj.search && typeof(urlObj.search) === "string") {
+              source.query = urlObj.search
+            }
+            if (parts[1] && typeof(parts[1]) === "string") {
+              // source.category = { name: parts[1] }
+              source.category = parts[1]
+            }
+            let customFrequency = "medium"
+            if (parts[2] && typeof(parts[2]) === "string") {
+              customFrequency = parts[2].toLowerCase()
+            }
+            if (parts[3] && typeof(parts[3]) === "string") {
+              source.network = parts[3] as "spasm" | "nostr" | "rss"
+            }
+            if (parts[4] && typeof(parts[4]) === "string") {
+              source.name = parts[4]
+            }
+            if (
+              parts[5] && typeof(parts[5]) === "string" &&
+              parts[5] === "false"
+            ) {
+              source.showSource = false
+            } else {
+              source.showSource = true
+            }
+              console.log("----------")
+              console.log("frequency:", frequency)
+              console.log("customFrequency:", customFrequency)
+              console.log("source:", source)
+            if (
+              frequency && customFrequency &&
+              frequency === customFrequency
+            ) {
+              console.log("pushing")
+              sources.push(source) }
+          }
+        })
       }
     }
 

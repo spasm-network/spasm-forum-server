@@ -78,6 +78,10 @@ const enableFederationDefaultListTech: boolean =
   process?.env?.ENABLE_FEDERATION_DEFAULT_LIST_TECH === 'false' ? false : true
 const enableFederationDefaultListPolitics: boolean =
   process?.env?.ENABLE_FEDERATION_DEFAULT_LIST_POLITICS === 'false' ? false : true
+const enableFederationCustomLinks: boolean =
+  process?.env?.ENABLE_FEDERATION_CUSTOM_LINKS === 'false' ? false : true
+const enableFederationCustomSources: boolean =
+  process?.env?.ENABLE_FEDERATION_CUSTOM_SOURCES === 'false' ? false : true
 
 const ignoreWhitelistForActionPostInSpasmModule: boolean =
   process?.env?.IGNORE_WHITELIST_FOR_ACTION_POST_IN_SPASM_MODULE === 'false' ? false : true
@@ -125,6 +129,8 @@ const whitelistedForActionOther: string[] =
   splitIntoArray(process?.env?.WHITELISTED_FOR_ACTION_OTHER)
 const pinnedIds: string[] =
   splitIntoArray(process?.env?.PINNED_IDS)
+const federationCustomLinks: string[] =
+  splitIntoArray(process?.env?.FEDERATION_CUSTOM_LINKS)
 
 // Filters
 const feedFiltersActivityHot: number =
@@ -171,6 +177,8 @@ export const updateAppConfig = async (
   updateBoolean("enableFederationDefaultListPrivacy"),
   updateBoolean("enableFederationDefaultListTech"),
   updateBoolean("enableFederationDefaultListPolitics"),
+  updateBoolean("enableFederationCustomLinks"),
+  updateBoolean("enableFederationCustomSources"),
   updateBoolean("enableRssModule")
   updateBoolean("enableRssSourcesUpdates")
   updateBoolean("enableRssFeedChannel")
@@ -193,6 +201,7 @@ export const updateAppConfig = async (
   updateArray("whitelistedForActionReact")
   updateArray("whitelistedForActionOther")
   updateArray("pinnedIds")
+  updateArray("federationCustomLinks")
 
   // Numbers
   const updateNumber = (key: AppConfigKeyNumber) => {
@@ -329,6 +338,7 @@ export let env = {
   enableWhitelistForActionOther,
   whitelistedForActionOther,
   pinnedIds,
+  federationCustomLinks,
   feedFiltersActivityHot,
   feedFiltersActivityRising,
   enableSpasmModule,
@@ -338,6 +348,8 @@ export let env = {
   enableFederationDefaultListPrivacy,
   enableFederationDefaultListTech,
   enableFederationDefaultListPolitics,
+  enableFederationCustomLinks,
+  enableFederationCustomSources,
   enableSpasmSourcesUpdates,
   enableRssModule,
   enableRssSourcesUpdates,
