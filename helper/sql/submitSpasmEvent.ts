@@ -18,7 +18,8 @@ import {
   isReactionDuplicate,
   deleteSpasmEventsV2FromDbByIds,
   incrementSpasmEventActionV2,
-  fetchEventWithSameUrlIdFromDbV2
+  fetchEventWithSameUrlIdFromDbV2,
+  fetchEventWithSameGuidIdFromDbV2
 } from "./sqlUtils";
 import {
   updateAppConfig
@@ -343,9 +344,22 @@ export const submitSpasmEvent = async (
     // web2 events without signatures are checked against URL ID
     // because Spasm ID might be different e.g. if an RSS item
     // has a slightly different value in pubdate or other fields.
-    } else {
+    } else if (
+      !!(spasm.getIdByFormat(spasmEvent, { name: "url" } ))
+    ) {
       isEventAlreadyInDb = !!(
         await fetchEventWithSameUrlIdFromDbV2(spasmEvent, pool)
+      )
+    } else if (
+      !!(spasm.getIdByFormat(spasmEvent, { name: "guid" } ))
+    ) {
+      isEventAlreadyInDb = !!(
+        await fetchEventWithSameGuidIdFromDbV2(spasmEvent, pool)
+      )
+    } else {
+      // fallback
+      isEventAlreadyInDb = !!(
+        await fetchEventWithSameSpasmIdFromDbV2(spasmEvent, pool)
       )
     }
 

@@ -1069,6 +1069,22 @@ export const fetchEventWithSameUrlIdFromDbV2 = async (
   )
 }
 
+export const fetchEventWithSameGuidIdFromDbV2 = async (
+  unknownEvent: UnknownEventV2,
+  pool = poolDefault,
+  idFormatName: SpasmEventIdFormatNameV2 = "guid",
+  idFormatVersion: string = "",
+  dirtyDbTable = "spasm_events"
+) => {
+  return await fetchEventWithSameIdFromDbV2(
+    unknownEvent,
+    pool,
+    idFormatName,
+    idFormatVersion,
+    dirtyDbTable
+  )
+}
+
 export const isReactionDuplicate = async (
   unknownEvent: UnknownEventV2,
   pool = poolDefault,
