@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import {
   SpasmSource,
-  Post,
   ConfigForSubmitSpasmEvent,
   UnknownEventV2,
   SpasmEventSource,
@@ -25,7 +24,10 @@ import {
   sourcesDefaultTechReplies,
   sourcesDefaultPoliticsReplies,
 } from "./sources";
-import {isArrayWithValues} from '../utils/utils';
+import {
+  isArrayWithValues,
+  extractHostnameFromUrl
+} from '../utils/utils';
 const { spasm } = require('spasm.js');
 // SPASM module is disabled by default
 // Override console.log for production
@@ -44,8 +46,6 @@ if (process.env.NODE_ENV !== "dev") {
 export const fetchPostsFromSpasmSources = async (
   frequency?: "low" | "medium" | "high" | "test"
 ) => {
-  console.log("fetchPostsFromSpasmSources called")
-  console.log("frequency:", frequency)
   const appConfig: AppConfig = await fetchAppConfig()
   if (
     !appConfig || typeof(appConfig) !== "object" ||
@@ -97,7 +97,6 @@ export const fetchPostsFromSpasmSources = async (
     absolutePath = path.resolve(__dirname, 'custom/customSpasmSources.js')
   }
 
-  // TODO tbc change absolutePath to db event
   // Check if a file with custom feed sources exists
   if (fs.existsSync(absolutePath)) {
     const {
@@ -243,14 +242,6 @@ export const fetchPostsFromSpasmSources = async (
 
     }
 
-    // TODO tbc fetch federationCustomLinks
-    // const enableFederationCustomLinks = true
-    // const federationCustomLinks = [
-    //   // "https://thedefiant.io/api/feed",
-    //   // "https://blog.1inch.io/feed"
-    // ]
-    console.log("enableFederationCustomLinks:", enableFederationCustomLinks)
-    console.log("federationCustomLinks:", federationCustomLinks)
     if (enableFederationCustomLinks) {
       if (
         federationCustomLinks &&
@@ -263,12 +254,9 @@ export const fetchPostsFromSpasmSources = async (
             const url = parts[0] ?? ""
             const urlObj = new URL(url)
             const source: SpasmEventSource = {}
-            if (
-              urlObj.hostname && typeof(urlObj.hostname) === "string"
-            ) {
-              source.name = urlObj.hostname
-            } else if (urlObj.host && typeof(urlObj.host) === "string") { 
-              source.name = urlObj.host
+            const hostname = extractHostnameFromUrl(url)
+            if (hostname && typeof(hostname) === "string") {
+              source.name = hostname
             }
             if (
               urlObj.origin && urlObj.pathname &&
@@ -300,15 +288,10 @@ export const fetchPostsFromSpasmSources = async (
             } else {
               source.showSource = true
             }
-              console.log("----------")
-              console.log("frequency:", frequency)
-              console.log("customFrequency:", customFrequency)
-              console.log("source:", source)
             if (
               frequency && customFrequency &&
               frequency === customFrequency
             ) {
-              console.log("pushing")
               sources.push(source) }
           }
         })
@@ -318,8 +301,7 @@ export const fetchPostsFromSpasmSources = async (
     if (sources && sources[0]) {
       // Execute sequentially one by one
       for (const source of sources) {
-        const result = await getData(source)
-        console.log("result:", result)
+        await getData(source)
       }
       return 'Success. Spasm sources fetched (federation)'
     }

@@ -787,6 +787,31 @@ export const pickOnlyTheseKeysFromObject = (
   return result
 }
 
+export const extractHostnameFromUrl = (
+  url: string
+): string => {
+  try {
+    if (!url || typeof(url) !== "string") return ""
+    const urlObj = new URL(url)
+    let hostname = ""
+    if (
+      urlObj.hostname && typeof(urlObj.hostname) === "string"
+    ) {
+      hostname = urlObj.hostname
+    } else if (
+      urlObj.host && typeof(urlObj.host) === "string"
+    ) { 
+      hostname = urlObj.host
+    }
+    if (hostname.startsWith("www.")) {
+      hostname = hostname.slice(4)
+    }
+    return hostname
+  } catch (err) {
+    return ""
+  }
+}
+
 // Used for tests to bypass TypeScript string type checks
 export const fakeAsString = (val: any): string => val as string
 
