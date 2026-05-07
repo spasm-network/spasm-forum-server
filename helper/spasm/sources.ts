@@ -97,6 +97,13 @@ export const sourcesDefaultPrivacyReplies: SpasmEventSource[] = [
 
 export const sourcesDefaultTech: SpasmEventSource[] = [
   {
+    name: "forum.spasm.network",
+    uiUrl: "https://forum.spasm.network/news/",
+    apiUrl: "https://forum.spasm.network/api/",
+    query: "events?webType=any&activity=rising&action=post&category=tech&limit=5",
+    showSource: true
+  },
+  {
     name: "degenrocket.space",
     uiUrl: "https://degenrocket.space/news/",
     apiUrl: "https://degenrocket.space/api/",
@@ -114,10 +121,24 @@ export const sourcesDefaultTech: SpasmEventSource[] = [
 
 export const sourcesDefaultTechReplies: SpasmEventSource[] = [
   {
+    name: "forum.spasm.network",
+    uiUrl: "https://forum.spasm.network/news/",
+    apiUrl: "https://forum.spasm.network/api/",
+    query: "events?webType=web3&activity=rising&action=reply&category=tech&limit=5",
+    showSource: true
+  },
+  {
     name: "degenrocket.space",
     uiUrl: "https://degenrocket.space/news/",
     apiUrl: "https://degenrocket.space/api/",
-    query: "events?webType=any&activity=rising&action=post&category=tech&limit=10",
+    query: "events?webType=web3&activity=rising&action=reply&category=tech&limit=10",
+    showSource: true
+  },
+  {
+    name: "zkpunks.dev",
+    uiUrl: "https://zkpunks.dev/news/",
+    apiUrl: "https://zkpunks.dev/api/",
+    query: "events?webType=web3&activity=rising&action=reply&category=tech&limit=5",
     showSource: true
   },
 ]
@@ -137,7 +158,7 @@ export const sourcesDefaultPoliticsReplies: SpasmEventSource[] = [
     name: "degenrocket.space",
     uiUrl: "https://degenrocket.space/news/",
     apiUrl: "https://degenrocket.space/api/",
-    query: "events?webType=any&activity=rising&action=reply&category=politics&limit=5",
+    query: "events?webType=web3&activity=rising&action=reply&category=politics&limit=5",
     showSource: true
   },
 ]
