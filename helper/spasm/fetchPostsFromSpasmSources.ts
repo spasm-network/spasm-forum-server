@@ -131,13 +131,6 @@ export const fetchPostsFromSpasmSources = async (
     try {
       if (!source.apiUrl) return "ERROR: no API URL in Spasm source"
 
-      // let fetchUrl = source.apiUrl
-      // if (source.query) {
-      //   fetchUrl += source.query
-      // }
-      // type ApiResponse = Post[]
-      // const response: AxiosResponse<ApiResponse> = await axios.get<ApiResponse>(fetchUrl);
-
       const response = await spasm.fetchEventsFromSource(source)
       // console.log("response:", response)
 
