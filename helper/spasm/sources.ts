@@ -66,14 +66,28 @@ export const sourcesDefaultPrivacy: SpasmEventSource[] = [
     name: "degenrocket.space",
     uiUrl: "https://degenrocket.space/news/",
     apiUrl: "https://degenrocket.space/api/",
-    query: "events?webType=any&activity=rising&action=post&category=privacy&category=monero&category=zcash&limit=5",
+    query: "events?webType=any&activity=rising&action=post&category=privacy&category=monero&category=zcash&category=zk&limit=5",
     showSource: true
   },
   {
     name: "dark.vegas",
     uiUrl: "https://dark.vegas/news/",
     apiUrl: "https://dark.vegas/api/",
-    query: "events?webType=any&activity=rising&action=post&category=privacy&category=podcasts&category=monero&category=zcash&limit=5",
+    query: "events?webType=any&activity=rising&action=post&category=privacy&category=podcasts&category=monero&category=zcash&category=zk&limit=5",
+    showSource: true
+  },
+  {
+    name: "monero.top",
+    uiUrl: "https://monero.top/news/",
+    apiUrl: "https://monero.top/api/",
+    query: "events?webType=any&activity=rising&action=post&category=privacy&category=podcasts&category=monero&category=zcash&category=zk&limit=5",
+    showSource: true
+  },
+  {
+    name: "forum.warptoad.org",
+    uiUrl: "https://forum.warptoad.org/news/",
+    apiUrl: "https://forum.warptoad.org/api/",
+    query: "events?webType=any&activity=rising&action=post&category=privacy&category=podcasts&category=monero&category=zcash&category=zk&limit=5",
     showSource: true
   },
 ]
@@ -83,14 +97,28 @@ export const sourcesDefaultPrivacyReplies: SpasmEventSource[] = [
     name: "degenrocket.space",
     uiUrl: "https://degenrocket.space/news/",
     apiUrl: "https://degenrocket.space/api/",
-    query: "events?webType=any&activity=rising&action=reply&category=privacy&category=monero&category=zcash&limit=10",
+    query: "events?webType=any&activity=rising&action=reply&category=privacy&category=monero&category=zcash&category=zk&limit=10",
     showSource: true
   },
   {
     name: "dark.vegas",
     uiUrl: "https://dark.vegas/news/",
     apiUrl: "https://dark.vegas/api/",
-    query: "events?webType=any&activity=rising&action=reply&category=privacy&category=podcasts&category=monero&category=zcash&limit=10",
+    query: "events?webType=any&activity=rising&action=reply&category=privacy&category=podcasts&category=monero&category=zcash&category=zk&limit=10",
+    showSource: true
+  },
+  {
+    name: "monero.top",
+    uiUrl: "https://monero.top/news/",
+    apiUrl: "https://monero.top/api/",
+    query: "events?webType=any&activity=rising&action=reply&category=privacy&category=podcasts&category=monero&category=zcash&category=zk&limit=10",
+    showSource: true
+  },
+  {
+    name: "forum.warptoad.org",
+    uiUrl: "https://forum.warptoad.org/news/",
+    apiUrl: "https://forum.warptoad.org/api/",
+    query: "events?webType=any&activity=rising&action=reply&category=privacy&category=podcasts&category=monero&category=zcash&category=zk&limit=10",
     showSource: true
   },
 ]
