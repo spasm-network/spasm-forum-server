@@ -55,6 +55,11 @@ const enableModeration: boolean =
   process?.env.ENABLE_MODERATION === 'false' ? false : true;
 const moderators: string[] = splitIntoArray(process?.env?.MODERATORS)
 
+// Blaclists
+const enableBlacklistedKeywords: boolean =
+  process?.env.ENABLE_BLACKLISTED_KEYWORDS === 'false' ? false : true;
+const blacklistedKeywords: string[] = splitIntoArray(process?.env?.BLACKLISTED_KEYWORDS)
+
 // Short IDs
 const enableShortUrlsForWeb3Actions =
   process?.env.ENABLE_SHORT_URLS_FOR_WEB3_ACTIONS === 'false' ? false : true;
@@ -164,6 +169,7 @@ export const updateAppConfig = async (
   updateBoolean("enableNewNostrActionsAll")
   updateBoolean("enableNewEthereumActionsAll")
   updateBoolean("enableModeration")
+  updateBoolean("enableBlacklistedKeywords")
   updateBoolean("enableShortUrlsForWeb3Actions")
   updateBoolean("enableWhitelistForActionPost")
   updateBoolean("enableWhitelistForActionReply")
@@ -202,6 +208,7 @@ export const updateAppConfig = async (
   updateArray("whitelistedForActionOther")
   updateArray("pinnedIds")
   updateArray("federationCustomLinks")
+  updateArray("blacklistedKeywords")
 
   // Numbers
   const updateNumber = (key: AppConfigKeyNumber) => {
@@ -327,6 +334,8 @@ export let env = {
   enableNewEthereumActionsAll,
   enableModeration,
   moderators,
+  enableBlacklistedKeywords,
+  blacklistedKeywords,
   enableShortUrlsForWeb3Actions,
   shortUrlsLengthOfWeb3Ids,
   enableWhitelistForActionPost,

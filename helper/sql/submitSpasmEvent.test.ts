@@ -60,6 +60,10 @@ const configEverythingDisabled: ConfigForSubmitSpasmEvent = {
     enabled: false,
     list: []
   },
+  blacklistedKeywords: {
+    enabled: false,
+    list: []
+  },
   admin: {
     enabled: false,
     list: []

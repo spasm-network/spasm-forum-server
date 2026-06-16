@@ -707,6 +707,7 @@ export interface AppConfig {
   enableNewNostrActionsAll?: boolean
   enableNewEthereumActionsAll?: boolean
   enableModeration?: boolean
+  enableBlacklistedKeywords?: boolean
   enableShortUrlsForWeb3Actions?: boolean
   enableWhitelistForActionPost?: boolean
   enableWhitelistForActionReply?: boolean
@@ -738,6 +739,7 @@ export interface AppConfig {
   whitelistedForActionOther?: string[]
   pinnedIds?: string[]
   federationCustomLinks?: string[]
+  blacklistedKeywords?: string[]
   // Numbers
   feedFiltersActivityHot?: number
   feedFiltersActivityRising?: number
@@ -890,6 +892,7 @@ export type AppConfigKeyBoolean =
   | "enableNewNostrActionsAll"
   | "enableNewEthereumActionsAll"
   | "enableModeration"
+  | "enableBlacklistedKeywords"
   | "enableShortUrlsForWeb3Actions"
   | "shortUrlsLengthOfWeb3Ids"
   | "enableWhitelistForActionPost"
@@ -924,6 +927,7 @@ export type AppConfigKeyArray =
   | "whitelistedForActionOther"
   | "pinnedIds"
   | "federationCustomLinks"
+  | "blacklistedKeywords"
 
 export type AppConfigKeyNumber =
   | "shortUrlsLengthOfWeb3Ids"
@@ -993,6 +997,10 @@ export class ConfigForSubmitSpasmEvent {
     enabled: boolean,
     list: string[]
   }
+  blacklistedKeywords: {
+    enabled: boolean,
+    list: string[]
+  }
   admin: {
     enabled: boolean,
     list: string[]
@@ -1044,6 +1052,10 @@ export class ConfigForSubmitSpasmEvent {
     this.moderation = {
       enabled: settings.enableModeration,
       list: settings.moderators
+    },
+    this.blacklistedKeywords = {
+      enabled: settings.enableBlacklistedKeywords,
+      list: settings.blacklistedKeywords
     },
     this.admin = {
       enabled: settings.enableAdmin,

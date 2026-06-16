@@ -169,6 +169,17 @@ export const submitSpasmEvent = async (
     ) {
       return "ERROR: submitting all new web3 actions is currently disabled"
     }
+    
+    if (
+      config.blacklistedKeywords.enabled &&
+      !isAdminEvent &&
+      !isAppConfig &&
+      spasm.eventContainsBannedWords(
+        spasmEvent, config.blacklistedKeywords.list
+      )
+    ) {
+      return "ERROR: your message contains banned keywords"
+    }
 
     if (
       // Nostr disabled
